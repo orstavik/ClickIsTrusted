@@ -48,6 +48,7 @@ function convertMouseEvent(e) {
     y: e.clientY,
     deltaX: e.deltaX,
     deltaY: e.deltaY,
+    // deltaMode: e.deltaMode, //isn't active in the interface.
     // timestamp: e.timestamp //todo include this one??
     // pointerType: "mouse" || "pen" //todo enable this one??
   };
@@ -79,3 +80,6 @@ function manInTheMiddle(event) {
 }
 
 window.addEventListener("mousedown-is-trusted", manInTheMiddle);
+window.addEventListener("mousemove-is-trusted", manInTheMiddle);
+window.addEventListener("mouseup-is-trusted", manInTheMiddle);
+window.addEventListener("wheel-is-trusted", manInTheMiddle);
