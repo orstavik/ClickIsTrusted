@@ -54,12 +54,58 @@ function convertMouseEvent(e) {
   };
 }
 
+function convertTouchType(type) {
+  if (type.startsWith("touchstart"))
+    return "touchStart";
+  if (type.startsWith("touchmove"))
+    return "touchMove";
+  if (type.startsWith("touchend"))
+    return "touchEnd";
+  if (type.startsWith("touchcancel"))
+    return "touchcancel";
+  throw new Error(`The ${type} event cannot be replicated by the ClickIsTrusted extension.`);
+}
+
+function makeTouchPoints(e) {
+  return e.touches.map(t => ({
+    x: t.clientX,
+    y: t.clientY,
+    radiusX: t.radiusX,
+    radiusY: t.radiusY,
+    rotationAngle: t.rotationAngle,
+    force: t.force,
+    id: t.identifier
+  }));
+}
+
 function convertTouchEvent(e) {
-  throw new Error("todo")
+  return {
+    type: convertTouchType(e.type),
+    modifiers: makeModifiersInteger(e),
+    touchPoints: makeTouchPoints(e),
+    // timestamp: e.timestamp //todo include this one??
+  }
 }
 
 function convertKeyEvent(e) {
-  throw new Error("todo")
+  const type = e.type === "keydown" ? "keyDown" : e.type === "keyup" ? "keyUp" : undefined;
+  !type && throw new Error(`The ${e.type} event cannot be replicated by the ClickIsTrusted extension.`);
+  return {
+    type,
+    modifiers: makeModifiersInteger(e),
+    key: e.key,
+    code: e.code,
+    text: e.text,
+    keyIdentifier: e.keyIdentifier,
+    unmodifiedText: e.unmodifiedText,
+    location: e.location,
+    isKeyPad: e.isKeyPad,
+    isSystemKey: e.isSystemKey,
+    nativeVirtualKeyCode: e.nativeVirtualKeyCode,
+    windowsVirtualKeyCode: e.windowsVirtualKeyCode,
+    autoRepeat: e.autoRepeat,
+    // timestamp: e.timestamp //todo include this one??
+  };
 }
 
 //att 1. calling chrome.runtime cannot be done from inside the event listener. (a different 'this' context?? don't know).
