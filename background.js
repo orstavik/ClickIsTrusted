@@ -36,36 +36,18 @@ chrome.tabs.onActivated.addListener(function callback(data) {
 })
 
 //part 2. turning messages into native events for active tabs.
-function dispatchMouseEvent(event, tabId) {
-  let type = event.type;
-  if (type.startsWith("mousedown"))
-    type = "mousePressed";
-  else if (type.startsWith("mouseup"))
-    type = "mouseReleased";
-  else if (type.startsWith("mousemove"))
-    type = "mouseMoved";
-  let button = event.button;
-  if (button === 0)
-    button = "left";
-  else if (button === 1)
-    button = "middle";
-  else if (button === 2)
-    button = "right";
-  const x = event.clientX, y = event.clientY;
-  chrome.debugger.sendCommand({tabId: tabId}, "Input.dispatchMouseEvent", {type, button, x, y},
-    function () {
-      console.log("sendCommand: Input.dispatchMouseEvent", {type, button, x, y});
-    });
-}
-
 function dispatchNativeEvent(event, tabId) {
   //convert the command into an approved native event here.
+  let cmd;
   if (event.type.startsWith("mouse"))
-    return dispatchMouseEvent(event, tabId);
-  if (event.type.startsWith("touch"))
-    return dispatchTouchEvent(event, tabId);
-  if (event.type.startsWith("key"))
-    return dispatchKeyEvent(event, tabId);
+    cmd = "Input.dispatchMouseEvent";
+  else if (event.type.startsWith("touch"))
+    cmd = "Input.dispatchTouchEvent";
+  else if (event.type.startsWith("key"))
+    cmd = "Input.dispatchKeyEvent";
+  else
+    throw new Error("Illegal native event: ", event);
+  chrome.debugger.sendCommand({tabId: tabId}, cmd, event, function () { console.log("sendCommand", cmd, event);});
 }
 
 chrome.runtime.onMessage.addListener(function handleMessage(request, sender, sendResponse) {
