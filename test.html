@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Test of ClickIsTrusted</title>
+</head>
+<body>
+<h1>dblclick to run the test.</h1>
+<p>
+  If the events come too many too fast, then the test breaks down.
+  Therefore, the tests needs to be run one by one in a setTimeout
+  to give the extension time to dispatch the native events.
+</p>
+<input type="text" value="hello sunshine!">
+<script>
+
+  function run() {
+    setTimeout(function () {
+
+      window.addEventListener("mousedown", function (e) {
+        console.log(
+          e.x === 12,
+          e.y === 34,
+          e.button === 0,
+          e.buttons === 1,
+          e.getModifierState("Alt"),
+          e.getModifierState("Shift"),
+          e.getModifierState("Meta"),
+          e.getModifierState("Control")
+        );
+      }, {capture: true, once: true});
+      window.dispatchEvent(new MouseEvent("mousedown-is-trusted", {
+        clientX: 12,
+        clientY: 34,
+        button: 0,
+        buttons: 1,
+        altKey: true,
+        shiftKey: true,
+        metaKey: true,
+        ctrlKey: true,
+      }));
+    });
+
+    setTimeout(function () {
+      window.addEventListener("mousemove", function (e) {
+        console.log(
+          e.x === 11,
+          e.y === 33,
+          e.button === 0,
+          e.buttons === 1,
+          !e.getModifierState("Alt"),
+          !e.getModifierState("Shift"),
+          !e.getModifierState("Meta"),
+          e.getModifierState("Control")
+        );
+      }, {capture: true, once: true});
+      window.dispatchEvent(new MouseEvent("mousemove-is-trusted", {
+        clientX: 11,
+        clientY: 33,
+        button: 0,
+        buttons: 1,
+        ctrlKey: true,
+      }));
+    });
+
+    setTimeout(function () {
+
+      window.addEventListener("mouseup", function (e) {
+        console.log(
+          e.x === 11,
+          e.y === 33,
+          e.button === 0,
+          e.buttons === 0,
+          e.getModifierState("Alt"),
+          !e.getModifierState("Shift"),
+          !e.getModifierState("Meta"),
+          !e.getModifierState("Control")
+        );
+      }, {capture: true, once: true});
+      window.dispatchEvent(new MouseEvent("mouseup-is-trusted", {
+        clientX: 11,
+        clientY: 33,
+        button: 0,
+        buttons: 0,
+        altKey: true,
+      }));
+    });
+
+    setTimeout(function () {
+
+      window.addEventListener("wheel", function (e) {
+        console.log(
+          e.deltaX === 1,
+          e.deltaY === 3,
+          e.buttons === 1,//why?? default to 1?
+          !e.getModifierState("Alt"),
+          !e.getModifierState("Shift"),
+          !e.getModifierState("Meta"),
+          !e.getModifierState("Control")
+        );
+      }, {capture: true, once: true});
+      window.dispatchEvent(new WheelEvent("wheel-is-trusted", {
+        deltaX: 1,
+        deltaY: 3,
+      }));
+    });
+
+    setTimeout(function () {
+      const input = document.querySelector("input");
+      input.focus();
+      window.addEventListener("keydown", function (e) {
+        console.log(
+          e.composed,
+          e.bubbles,
+          e.key === "a",
+          e.code === "KeyA",
+          // e.keyCode === 0, //this isn't set
+
+
+          !e.getModifierState("Alt"),
+          e.getModifierState("Shift"),
+          !e.getModifierState("Meta"),
+          !e.getModifierState("Control"),
+          e.target === input
+        );
+      }, {capture: true, once: true});
+      const keydown = new KeyboardEvent("keydown-is-trusted", {
+        key: "a",
+        code: "KeyA",
+        shiftKey: 1,
+      });
+      keydown.text = "A";
+      window.dispatchEvent(keydown);
+    }, 500);
+    //the keydown and keyup events need some extra time for themselves,
+    // so that the focus isn't shifted by the mousedown.
+  }
+
+  window.addEventListener("dblclick", run);
+</script>
+</body>
+</html>

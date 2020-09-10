@@ -4,7 +4,7 @@ function makeModifiersInteger(e) {
   let res = 0;
   if (e.getModifierState("Alt"))
     res += 1;
-  if (e.getModifierState("Ctrl"))
+  if (e.getModifierState("Control"))
     res += 2;
   if (e.getModifierState("Meta"))
     res += 4;
@@ -88,22 +88,25 @@ function convertTouchEvent(e) {
 }
 
 function convertKeyEvent(e) {
-  const type = e.type === "keydown" ? "keyDown" : e.type === "keyup" ? "keyUp" : undefined;
-  !type && throw new Error(`The ${e.type} event cannot be replicated by the ClickIsTrusted extension.`);
+  const type = e.type.startsWith("keydown") ? "keyDown" : e.type.startsWith("keyup") ? "keyUp" : undefined;
+  if (!type)
+    throw new Error(`The ${e.type} event cannot be replicated by the ClickIsTrusted extension.`);
   return {
     type,
     modifiers: makeModifiersInteger(e),
     key: e.key,
     code: e.code,
+    location: e.location,
+    autoRepeat: e.repeat,
+
     text: e.text,
     keyIdentifier: e.keyIdentifier,
     unmodifiedText: e.unmodifiedText,
-    location: e.location,
     isKeyPad: e.isKeyPad,
     isSystemKey: e.isSystemKey,
     nativeVirtualKeyCode: e.nativeVirtualKeyCode,
     windowsVirtualKeyCode: e.windowsVirtualKeyCode,
-    autoRepeat: e.autoRepeat,
+
     // timestamp: e.timestamp //todo include this one??
   };
 }
@@ -129,3 +132,5 @@ window.addEventListener("mousedown-is-trusted", manInTheMiddle);
 window.addEventListener("mousemove-is-trusted", manInTheMiddle);
 window.addEventListener("mouseup-is-trusted", manInTheMiddle);
 window.addEventListener("wheel-is-trusted", manInTheMiddle);
+window.addEventListener("keydown-is-trusted", manInTheMiddle);
+window.addEventListener("keyup-is-trusted", manInTheMiddle);
