@@ -10,30 +10,31 @@
 <input type="text" value="hello sunshine!">
 <script>
 
+  window.addEventListener("keydown", function (e) {
+    console.log(
+      e.type,
+      e.isTrusted,
+      e.composed,
+      e.bubbles,
+      e.key === "a",
+      e.code === "KeyA",
+      // e.keyCode === 0, //this isn't set
+
+
+      !e.getModifierState("Alt"),
+      !e.getModifierState("Shift"),
+      !e.getModifierState("Meta"),
+      !e.getModifierState("Control"),
+      e.target === input,
+      e);
+  });
+
   function run() {
 
     const input = document.querySelector("input");
     input.focus();
 
     setTimeout(function () {
-      window.addEventListener("keydown", function (e) {
-        console.log(
-          e.type,
-          e.isTrusted,
-          e.composed,
-          e.bubbles,
-          e.key === "a",
-          e.code === "KeyA",
-          // e.keyCode === 0, //this isn't set
-
-
-          !e.getModifierState("Alt"),
-          !e.getModifierState("Shift"),
-          !e.getModifierState("Meta"),
-          !e.getModifierState("Control"),
-          e.target === input,
-          e);
-      }, {capture: true, once: true});
       const keyA = new KeyboardEvent("keydown-is-trusted", {
         key: "a",
         code: "KeyA",

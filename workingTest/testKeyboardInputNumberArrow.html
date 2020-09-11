@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Test of ClickIsTrusted</title>
+</head>
+<body>
+<h1>dblclick to run the test.</h1>
+
+<input type="number" value="666">
+<script>
+
+  const input = document.querySelector("input");
+
+  window.addEventListener("keydown", function (e) {
+    console.log(
+      e.type,
+      e.isTrusted,
+      e.composed,
+      e.bubbles,
+      e.key === "ArrowUp",
+      e.code === "ArrowUp",
+      e.target === input
+    );
+  });
+
+  function run() {
+    input.focus();
+    const keydown = new KeyboardEvent("keydown-is-trusted", {
+      key: "ArrowUp",
+      code: "ArrowUp",
+    });
+    window.dispatchEvent(keydown);
+  }
+
+  window.addEventListener("dblclick", run);
+</script>
+</body>
+</html>
