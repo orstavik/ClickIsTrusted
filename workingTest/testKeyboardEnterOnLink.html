@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Test of ClickIsTrusted</title>
+</head>
+<body>
+<h1>dblclick to run the test.</h1>
+
+<a href="#sunshine">hello</a>
+<script>
+
+  function run() {
+
+    const a = document.querySelector("a");
+    a.focus();
+
+    setTimeout(function () {
+      window.addEventListener("keydown", function (e) {
+        console.log(
+          e.type,
+          e.isTrusted,
+          e.composed,
+          e.bubbles,
+          e.key === "Enter",
+          e.code === "Enter",
+          // e.keyCode === 0, //this isn't set
+
+
+          !e.getModifierState("Alt"),
+          !e.getModifierState("Shift"),
+          !e.getModifierState("Meta"),
+          !e.getModifierState("Control"),
+          e.target === a,
+          e);
+      }, {capture: true, once: true});
+      const Enter = new KeyboardEvent("keydown-is-trusted", {
+        key: "Enter",
+        code: "Enter",
+        // shiftKey: 1,
+      });
+      Enter.text = "a";
+      Enter.keyIdentifier = 'U+000D';
+      Enter.unmodifiedText = "";
+      Enter.isKeyPad = 0;
+      Enter.isSystemKey = 0;
+      Enter.nativeVirtualKeyCode = 13;
+      Enter.windowsVirtualKeyCode = 13;
+      Enter.macVirtualKeyCode = 13;
+      window.dispatchEvent(Enter);
+    }, 0);
+
+    setTimeout(function () {
+      window.addEventListener("keydown", function (e) {
+        console.log(
+          e.type,
+          e.isTrusted,
+          e.composed,
+          e.bubbles,
+          e.key === "Enter",
+          e.code === "Enter",
+          // e.keyCode === 0, //this isn't set
+
+
+          !e.getModifierState("Alt"),
+          !e.getModifierState("Shift"),
+          !e.getModifierState("Meta"),
+          !e.getModifierState("Control"),
+          e.target === a,
+          e);
+      }, {capture: true, once: true});
+      const Enter = new KeyboardEvent("rawkeydown-is-trusted", {
+        key: "Enter",
+        code: "Enter",
+        // shiftKey: 1,
+      });
+      Enter.text = "a";
+      Enter.keyIdentifier = 'U+000D';
+      Enter.unmodifiedText = "";
+      Enter.isKeyPad = 0;
+      Enter.isSystemKey = 0;
+      Enter.nativeVirtualKeyCode = 13;
+      Enter.windowsVirtualKeyCode = 13;
+      Enter.macVirtualKeyCode = 13;
+      window.dispatchEvent(Enter);
+    }, 0);
+
+    // setTimeout(function () {
+    //   window.addEventListener("keydown", function (e) {
+    //     console.log(
+    //       e.type,
+    //       e.isTrusted,
+    //       e.composed,
+    //       e.bubbles,
+    //       e.key === "Enter",
+    //       e.code === "Enter",
+    //       // e.keyCode === 0, //this isn't set
+    //
+    //
+    //       !e.getModifierState("Alt"),
+    //       !e.getModifierState("Shift"),
+    //       !e.getModifierState("Meta"),
+    //       !e.getModifierState("Control"),
+    //       e.target === a,
+    //       e);
+    //   }, {capture: true, once: true});
+    //   const Enter = new KeyboardEvent("char-is-trusted", {
+    //     key: "Enter",
+    //     code: "Enter",
+    //     // shiftKey: 1,
+    //   });
+    //   Enter.text = "a";
+    //   Enter.keyIdentifier = 'U+000D';
+    //   Enter.unmodifiedText = "";
+    //   Enter.isKeyPad = 0;
+    //   Enter.isSystemKey = 0;
+    //   Enter.nativeVirtualKeyCode = 13;
+    //   Enter.windowsVirtualKeyCode = 13;
+    //   Enter.macVirtualKeyCode = 13;
+    //   window.dispatchEvent(Enter);
+    // }, 0);
+
+  }
+
+  window.addEventListener("dblclick", run);
+</script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Test of ClickIsTrusted</title>
+</head>
+<body>
+<h1>dblclick to run the test.</h1>
+
+<input type="number" value="666">
+<script>
+
+  function run() {
+
+    const input = document.querySelector("input");
+    input.focus();
+
+    setTimeout(function () {
+      window.addEventListener("keydown", function (e) {
+        console.log(
+          e.type,
+          e.isTrusted,
+          e.composed,
+          e.bubbles,
+          e.key === "a",
+          e.code === "KeyA",
+          // e.keyCode === 0, //this isn't set
+
+
+          !e.getModifierState("Alt"),
+          e.getModifierState("Shift"),
+          !e.getModifierState("Meta"),
+          !e.getModifierState("Control"),
+          e.target === input
+        );
+      }, {capture: true, once: true});
+      const keydown = new KeyboardEvent("keydown-is-trusted", {
+        key: "a",
+        code: "ArrowLeft",
+      });
+      keydown.text = "A";
+      keydown.keyIdentifier = 'U+0041';
+      keydown.unmodifiedText = "A";
+      // keydown.isKeyPad;
+      // keydown.isSystemKey;
+      keydown.nativeVirtualKeyCode = 65;
+      keydown.windowsVirtualKeyCode = 65;
+      keydown.macVirtualKeyCode = 65;
+      window.dispatchEvent(keydown);
+    }, 500);
+    //the keydown and keyup events need some extra time for themselves,
+    // so that the focus isn't shifted by the mousedown.
+  }
+
+  window.addEventListener("dblclick", run);
+</script>
+</body>
+</html>
