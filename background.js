@@ -43,7 +43,7 @@ function dispatchNativeEvent(event, tabId) {
     cmd = "Input.dispatchMouseEvent";
   else if (event.type.startsWith("touch"))
     cmd = "Input.dispatchTouchEvent";
-  else if (event.type.startsWith("key"))
+  else if (event.type === "keyDown" || event.type === "keyUp" || event.type === "char" || event.type === "rawKeyDown")
     cmd = "Input.dispatchKeyEvent";
   else
     throw new Error("Illegal native event: ", event);

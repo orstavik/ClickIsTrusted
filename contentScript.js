@@ -87,12 +87,21 @@ function convertTouchEvent(e) {
   }
 }
 
+function convertKeyType(type) {
+  if (type === "keydown-is-trusted")
+    return "keyDown";
+  if (type === "keyup-is-trusted")
+    return "keyUp";
+  if (type === "rawkeydown-is-trusted")
+    return "rawKeyDown";
+  if (type === "char-is-trusted")
+    return "char";
+  throw new Error(`The ${e.type} event cannot be replicated by the ClickIsTrusted extension.`);
+}
+
 function convertKeyEvent(e) {
-  const type = e.type.startsWith("keydown") ? "keyDown" : e.type.startsWith("keyup") ? "keyUp" : undefined;
-  if (!type)
-    throw new Error(`The ${e.type} event cannot be replicated by the ClickIsTrusted extension.`);
   return {
-    type,
+    type: convertKeyType(e.type),
     modifiers: makeModifiersInteger(e),
     key: e.key,
     code: e.code,
@@ -113,16 +122,21 @@ function convertKeyEvent(e) {
 
 //att 1. calling chrome.runtime cannot be done from inside the event listener. (a different 'this' context?? don't know).
 function sendMessage(e) {
+  let message;
   if (e instanceof MouseEvent)
-    chrome.runtime.sendMessage(convertMouseEvent(e));
-  if (e instanceof TouchEvent)
-    chrome.runtime.sendMessage(convertTouchEvent(e));
-  if (e instanceof KeyboardEvent)
-    chrome.runtime.sendMessage(convertKeyEvent(e));
+    message = convertMouseEvent(e);
+  else if (e instanceof TouchEvent)
+    message = convertTouchEvent(e);
+  else if (e instanceof KeyboardEvent)
+    message = convertKeyEvent(e);
+  else
+    throw new Error("a script has tried to send a bad message: ", e);
+  console.log("Passing native event request to background.js: ", message);
+  chrome.runtime.sendMessage(message);
 }
 
 function manInTheMiddle(event) {
-  console.log("passing request for native event to background.js:", event);
+  console.log("received native event request from web page:", event);
   event.stopImmediatePropagation();
   event.preventDefault();
   sendMessage(event);
