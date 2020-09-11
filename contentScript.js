@@ -148,3 +148,5 @@ window.addEventListener("mouseup-is-trusted", manInTheMiddle);
 window.addEventListener("wheel-is-trusted", manInTheMiddle);
 window.addEventListener("keydown-is-trusted", manInTheMiddle);
 window.addEventListener("keyup-is-trusted", manInTheMiddle);
+window.addEventListener("rawkeydown-is-trusted", manInTheMiddle);
+window.addEventListener("char-is-trusted", manInTheMiddle);
