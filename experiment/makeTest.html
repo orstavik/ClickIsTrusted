@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <style>
+    * { margin: 0; bottom: 0; }
+    #target {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 200px;
+      height: 200px;
+    }
+    #controls{
+      position: absolute;
+      top: 0;
+      right: 0;
+    }
+  </style>
+</head>
+<body>
+<div id="controls">
+
+<details id="dom">
+  <summary>Show/hide the dom</summary>
+  <textarea id="domText" cols="30" rows="10"></textarea>
+</details>
+
+<details id="test">
+  <summary>Show/hide the test code</summary>
+  <textarea id="textText" cols="30" rows="10"></textarea>
+</details>
+
+<details id="result">
+  <summary>Show/hide the result</summary>
+  <textarea id="resultText" cols="30" rows="10"></textarea>
+</details>
+  <select id="events" multiple>
+    <option value="mousedown">mousedown</option>
+    <option value="mouseup">mouseup</option>
+    <option value="mousemove">mousemove</option>
+    <option value="wheel">wheel</option>
+  </select>
+  <button>start recording</button>
+</div>
+
+<div id="target"></div>
+
+</body>
+</html>

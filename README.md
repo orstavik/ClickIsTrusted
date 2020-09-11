@@ -2,13 +2,25 @@
 
 > Chrome extension that lets you dispatch native events during tests.
 
-1. Install ClickIsTrusted as a chrome extension. So far, you have to download the project and do it in developer mode from a directory on disc.
+1. Install ClickIsTrusted as a chrome extension. 
+   1. Download/clone the project from github into a local folder.
+   2. Open Chrome(ium) browser and the page [chrome://extensions/](chrome://extensions/).
+   3. Select `developer mode` top right corner.
+   4. `Load unpacked` and select the local folder where you stored this project.
+   5. Click on the extension symbol in the top right corner of you browser, and `pin` the ClickIsTrusted extension.
+   6. ClickIsTrusted is now installed. Maybe you need to restart Chrome, but don't think so.
 
-2. ClickIsTrusted will add itself as a button on the top-right corner of your browser.
+2. ClickIsTrusted is always in deactivated mode. To start ClickIsTrusted you must click on its symbol (the small cursor in black outline in the top bar right of the url). When ClickIsTrusted is active for one of your tabs, then you see a red arrow. When it is deactivated for that tab, the arrow is black.
+ 
+**ATT!! You must always start ClickIsTrusted on individual tabs. When you reload or navigate to a new page within the same tab, ClickIsTrusted remains active.**
 
-3. This button works on a per tab basis. Whenever you click on the button once, it turns red and enables dispatches of native events to your tab.
+3. When ClickIsTrusted is running, you can use it from within the web page by dispatching particular native events that you see below. 
 
-4. If you click on it again, it turns the dispatch of nativeEvents off for that tab.
+**The idea is that ClickIsTrusted adds some extra events in the browser: `mousemove-is-trusted` for example. Your web page can now dispatch these events, and the extension will pick them up and turn them into real, native events.**
+
+This is for testing purposes. Your web page must build their own test framework. The ClickIsTrusted has no opinion about what your test framework should look like, **except one thing!! You must have some ms delay between events, as the browser will only allow 1 or 2 or 3 such native events to exist in the queue at any time**. Or something like that. So have ~16ms between the native events, and you will most likely be fine.
+
+4. To run one of the default tests, just install the ClickIsTrusted extension, activate it in a tab in Chrome(ium), and then open for example [workingTest/testMouse.html](workingTest/testMouse.html).  
 
 ## How to use ClickIsTrusted from your web page?
 
@@ -89,3 +101,4 @@ Each `touchPoint` consists of the following values:
     id: t.identifier
 ``` 
 In addition, an `e.modifiers` attribute that register if `alt`, `shift`, `ctrl`, `meta` have been pressed. This is generated automatically for all native events, based on the corresponding normal properties for the modifier keys in js `Event` interface.
+
