@@ -81,6 +81,18 @@ nativeVirtualKeyCode,
 windowsVirtualKeyCode,
 ``` 
 
+## `beforeinput`
+
+The `beforeinput` event can be replicated (in Chrome only?).
+
+There is only one property that is transferred: `data`.
+
+```javascript
+window.dispatchEvent(new InputEvent("beforeinput-is-trusted", {composed: false, bubbles: true, data: "abc"}));
+
+window.addEventListener("beforeinput", e=>console.log(e.type, e.isTrusted, e.data, e));
+```
+
 ## TouchEvents
 
 The `TouchEvents` that can be replicated natively are: `touchstart`, `touchend`, `touchmove`, `touchcancel`.
