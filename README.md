@@ -114,3 +114,14 @@ Each `touchPoint` consists of the following values:
 ``` 
 In addition, an `e.modifiers` attribute that register if `alt`, `shift`, `ctrl`, `meta` have been pressed. This is generated automatically for all native events, based on the corresponding normal properties for the modifier keys in js `Event` interface.
 
+## References:
+
+ * Puppeteer: [Input.ts](https://github.com/puppeteer/puppeteer/blob/main/src/common/Input.ts);
+ * Chrome extension documentation: [Input](https://chromedevtools.github.io/devtools-protocol/tot/Input/);
+ * Chrome extension documentation: [Input.insertText](https://chromedevtools.github.io/devtools-protocol/tot/Input/#method-insertText);
+ * Chrome extension documentation: [sendCommand](https://developer.chrome.com/extensions/debugger#method-sendCommand);
+ * Chrome extension documentation: [onActivated](https://developer.chrome.com/extensions/tabs#event-onActivated);
+ * Chrome extension documentation: [sendMessage](https://developer.chrome.com/extensions/runtime#method-sendMessage);
+ * MDN: [modifier keys](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/getModifierState)
+
+ * Chromium: [examples](https://chromium.googlesource.com/chromium/src/+/master/chrome/common/extensions/docs/examples)
