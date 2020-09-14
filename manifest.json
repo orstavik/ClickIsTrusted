@@ -6,7 +6,6 @@
     "debugger",
     "activeTab",
     "declarativeContent",
-    "storage",
     "https://*/*",
     "http://*/*"
   ],

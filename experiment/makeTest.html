@@ -49,6 +49,7 @@
   <button id="start">start recording</button>
   <button id="stop">stop recording</button>
   <button id="auto">play recording (auto test)</button>
+  <button id="save">save test</button>
 </div>
 
 <div id="target"></div>
@@ -70,6 +71,7 @@
 
   function startRecording() {
     result.value = "";
+    location.hash= "";
     events = [];
     results = [];
     recording = true;
@@ -138,13 +140,24 @@
     }, 1000 * i);
   }
 
+  function saveRecording(){
+    const a = document.createElement('a');
+    const blob = new Blob([result.value],{ type: "text/plain;charset=utf-8" });
+    a.href = URL.createObjectURL(blob);
+    a.download = "test" + performance.now() +".json";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
   const start = document.querySelector("#start");
   const stop = document.querySelector("#stop");
   const auto = document.querySelector("#auto");
+  const save = document.querySelector("#save");
 
   start.addEventListener("click", startRecording);
   stop.addEventListener("click", stopRecording);
   auto.addEventListener("click", autoRecording);
+  save.addEventListener("click", saveRecording);
 </script>
 </body>
 </html>
