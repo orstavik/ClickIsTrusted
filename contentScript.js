@@ -1,4 +1,4 @@
-console.log("contentscript for ClickIsTrusted, click here to debug.");
+console.log("ClickIsTrusted: loading contentscript (and here is the debug link).");
 
 function makeModifiersInteger(e) {
   let res = 0;
@@ -50,7 +50,7 @@ function convertMouseEvent(e) {
     deltaY: e.deltaY,
     clickCount: 1, // needed to make composed `click` events
     // deltaMode: e.deltaMode, //isn't active in the interface.
-    // timestamp: e.timestamp //todo include this one??
+    // timeStamp: e.timeStamp //todo include this one??
     // pointerType: "mouse" || "pen" //todo enable this one??
   };
 }
@@ -67,8 +67,9 @@ function convertTouchType(type) {
   throw new Error(`The ${type} event cannot be replicated by the ClickIsTrusted extension.`);
 }
 
-function makeTouchPoints(e) {
-  return e.touches.map(t => ({
+//todo this is untested and probably doesn't work. see eventToObject.js
+function convertTouchPoint(t) {
+  return {
     x: t.clientX,
     y: t.clientY,
     radiusX: t.radiusX,
@@ -76,15 +77,15 @@ function makeTouchPoints(e) {
     rotationAngle: t.rotationAngle,
     force: t.force,
     id: t.identifier
-  }));
+  };
 }
 
 function convertTouchEvent(e) {
   return {
     type: convertTouchType(e.type),
     modifiers: makeModifiersInteger(e),
-    touchPoints: makeTouchPoints(e),
-    // timestamp: e.timestamp //todo include this one??
+    touchPoints: e.touches.map(convertTouchPoint),
+    // timeStamp: e.timeStamp //todo include this one??
   }
 }
 
@@ -117,7 +118,7 @@ function convertKeyEvent(e) {
     nativeVirtualKeyCode: e.nativeVirtualKeyCode,
     windowsVirtualKeyCode: e.windowsVirtualKeyCode,
 
-    // timestamp: e.timestamp //todo include this one??
+    // timeStamp: e.timeStamp //todo include this one??
   };
 }
 
@@ -127,7 +128,7 @@ function convertInputEvent(e) {
   return {
     type: e.type,
     text: e.data,
-    // timestamp: e.timestamp //todo include this one??
+    // timeStamp: e.timeStamp //todo include this one??
   };
 }
 

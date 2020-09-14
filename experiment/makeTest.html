@@ -12,40 +12,139 @@
       width: 200px;
       height: 200px;
     }
-    #controls{
+    #controls {
       position: absolute;
       top: 0;
       right: 0;
     }
+    button {display: block;}
   </style>
 </head>
 <body>
 <div id="controls">
 
-<details id="dom">
-  <summary>Show/hide the dom</summary>
-  <textarea id="domText" cols="30" rows="10"></textarea>
-</details>
+  <details open>
+    <summary>Show/hide the dom</summary>
+    <textarea id="dom" cols="30" rows="10">&#60;h1&#62;hello sunshine&#60;/h1&#62;</textarea>
+  </details>
 
-<details id="test">
-  <summary>Show/hide the test code</summary>
-  <textarea id="textText" cols="30" rows="10"></textarea>
-</details>
+  <details open>
+    <summary>Show/hide the test code</summary>
+    <textarea id="test" cols="30" rows="10">return e.type</textarea>
+  </details>
 
-<details id="result">
-  <summary>Show/hide the result</summary>
-  <textarea id="resultText" cols="30" rows="10"></textarea>
-</details>
+  <details open>
+    <summary>Show/hide the result</summary>
+    <textarea id="result" cols="30" rows="10"></textarea>
+  </details>
+
   <select id="events" multiple>
-    <option value="mousedown">mousedown</option>
-    <option value="mouseup">mouseup</option>
+    <option value="mousedown" selected>mousedown</option>
+    <option value="mouseup" selected>mouseup</option>
     <option value="mousemove">mousemove</option>
+    <option value="click">mousemove</option>
     <option value="wheel">wheel</option>
   </select>
-  <button>start recording</button>
+
+  <button id="start">start recording</button>
+  <button id="stop">stop recording</button>
+  <button id="auto">play recording (auto test)</button>
 </div>
 
 <div id="target"></div>
 
+<script type="module">
+  import {eventToObject} from "./eventToObject.js";
+
+  const userDrivenEvents = ["mousedown", "mousemove", "mouseup", "wheel", "keydown", "keyup", "beforeinput", "touchstart", "touchmove", "touchend", "touchcancel"];
+
+  let recording = false;
+  const dom = document.querySelector("#dom");
+  let target = document.querySelector("#target");
+  const result = document.querySelector("#result");
+  let events;
+  let results;
+  let selectedEvents = document.querySelector("#events");
+  let test = document.querySelector("#test");
+  let testFunction;
+
+  function startRecording() {
+    result.value = "";
+    events = [];
+    results = [];
+    recording = true;
+    render();
+    testFunction = eval("(function(){return function itsATest(e){" + test.value + "}})()");
+    for (let option of selectedEvents.selectedOptions)
+      target.addEventListener(option.value, runTest);
+  }
+
+  function stopRecording() {
+    recording = false;
+  }
+
+  function render() {
+    target.remove();
+    target = document.createElement("div");
+    target.id = "target";
+    document.body.appendChild(target);
+    try {
+      const div = document.createElement("div");
+      div.innerHTML = dom.value;
+      for (let newChild of div.children)
+        target.appendChild(newChild);
+    } catch (err) {
+      console.warn(err);
+    }
+  }
+
+  function runTest(e) {
+    results.push(testFunction(e));
+    events.push(e);
+    const obj = {dom: dom.value, test: test.value, events: events, results: results};
+    result.value = JSON.stringify(obj, (name, obj) => obj instanceof Event ? eventToObject(obj) : obj, 2);
+  }
+
+  function compareResults(start, stop) {
+    start = JSON.parse(start);
+    stop = JSON.parse(stop);
+    start.events.forEach(event => event.timeStamp = 0);
+    stop.events.forEach(event => event.timeStamp = 0);
+    return JSON.stringify(start) === JSON.stringify(stop);
+  }
+
+  function autoRecording() {
+    const start = result.value;
+    const json = JSON.parse(start);
+    let i = 0;
+
+    setTimeout(function () {
+      dom.value = json.dom;
+      test.value = json.test;
+      startRecording();
+    }, 1000 * i++);
+
+    const autoEvents = json.events.filter(e => userDrivenEvents.indexOf(e.type) >= 0);
+    for (let event of autoEvents) {
+      setTimeout(function () {
+        const isTrustedEvent = new MouseEvent(event.type + "-is-trusted", event);
+        window.dispatchEvent(isTrustedEvent);
+      }, 1000 * i++);
+    }
+
+    setTimeout(function () {
+      stopRecording();
+      console.log(compareResults(start, result.value));
+    }, 1000 * i);
+  }
+
+  const start = document.querySelector("#start");
+  const stop = document.querySelector("#stop");
+  const auto = document.querySelector("#auto");
+
+  start.addEventListener("click", startRecording);
+  stop.addEventListener("click", stopRecording);
+  auto.addEventListener("click", autoRecording);
+</script>
 </body>
 </html>
