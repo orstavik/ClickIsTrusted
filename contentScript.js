@@ -48,6 +48,7 @@ function convertMouseEvent(e) {
     y: e.clientY,
     deltaX: e.deltaX,
     deltaY: e.deltaY,
+    clickCount: 1, // needed to make composed `click` events
     // deltaMode: e.deltaMode, //isn't active in the interface.
     // timestamp: e.timestamp //todo include this one??
     // pointerType: "mouse" || "pen" //todo enable this one??

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Test of ClickIsTrusted</title>
+  <style>
+    * {margin: 0; bottom: 0}
+    h1 {position: absolute; top: 0; left: 0; height: 100px; width: 100%;}
+    div {position: absolute; top: 150px; left: 150px; height: 5px; width: 5px; background-color: red;}
+  </style>
+</head>
+<body>
+<h1>dblclick anywhere to make an extra isTrusted `click` event on the tiny red dot.</h1>
+<div></div>
+
+<script>
+  function log(e) {
+    return console.log(e.type, e.isTrusted, e.clientX, e.clientY);
+  }
+
+  function run() {
+    setTimeout(function () {
+      window.addEventListener("mousedown", log, {once: true});
+      window.addEventListener("mousemove", log, {once: true});
+      window.addEventListener("mouseup", log, {once: true});
+      window.addEventListener("click", log, {once: true});
+
+
+      setTimeout(function () {
+        window.dispatchEvent(new MouseEvent("mousemove-is-trusted", {
+          clientX: 153,
+          clientY: 153,
+          button: 0,
+          buttons: 1
+        }));
+      }, 0);
+      setTimeout(function () {
+        window.dispatchEvent(new MouseEvent("mousedown-is-trusted", {
+          clientX: 152,
+          clientY: 152,
+          button: 0,
+          buttons: 1
+        }));
+      }, 25);
+      setTimeout(function () {
+        window.dispatchEvent(new MouseEvent("mouseup-is-trusted", {clientX: 153, clientY: 153, button: 0, buttons: 1}));
+      }, 50);
+    });
+  }
+
+  window.addEventListener("dblclick", run);
+</script>
+</body>
+</html>
