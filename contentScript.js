@@ -120,6 +120,16 @@ function convertKeyEvent(e) {
   };
 }
 
+function convertInputEvent(e) {
+  if (!e.type.startsWith("beforeinput"))
+    throw new Error(`The ${e.type} event cannot be replicated by the ClickIsTrusted extension.`);
+  return {
+    type: e.type,
+    text: e.data,
+    // timestamp: e.timestamp //todo include this one??
+  };
+}
+
 //att 1. calling chrome.runtime cannot be done from inside the event listener. (a different 'this' context?? don't know).
 function sendMessage(e) {
   let message;
@@ -129,6 +139,8 @@ function sendMessage(e) {
     message = convertTouchEvent(e);
   else if (e instanceof KeyboardEvent)
     message = convertKeyEvent(e);
+  else if (e instanceof InputEvent)
+    message = convertInputEvent(e);
   else
     throw new Error("a script has tried to send a bad message: ", e);
   console.log("Passing native event request to background.js: ", message);
@@ -150,3 +162,4 @@ window.addEventListener("keydown-is-trusted", manInTheMiddle);
 window.addEventListener("keyup-is-trusted", manInTheMiddle);
 window.addEventListener("rawkeydown-is-trusted", manInTheMiddle);
 window.addEventListener("char-is-trusted", manInTheMiddle);
+window.addEventListener("beforeinput-is-trusted", manInTheMiddle);

@@ -35,6 +35,15 @@ chrome.tabs.onActivated.addListener(function callback(data) {
   updateIcon(data.tabId);
 })
 
+chrome.runtime.onMessage.addListener(function handleMessage(request, sender, sendResponse) {
+  //filtering out inactive tabs
+  var tabId = sender.tab.id;
+  if (!activeTabs[tabId])
+    return;
+  console.log("received request from clientScript on active tab", request);
+  dispatchNativeEvent(request, tabId);
+});
+
 //part 2. turning messages into native events for active tabs.
 function dispatchNativeEvent(event, tabId) {
   //convert the command into an approved native event here.
@@ -45,17 +54,11 @@ function dispatchNativeEvent(event, tabId) {
     cmd = "Input.dispatchTouchEvent";
   else if (event.type === "keyDown" || event.type === "keyUp" || event.type === "char" || event.type === "rawKeyDown")
     cmd = "Input.dispatchKeyEvent";
+  else if (event.type === "beforeinput-is-trusted")
+    cmd = "Input.insertText";
   else
     throw new Error("Illegal native event: ", event);
-  chrome.debugger.sendCommand({tabId: tabId}, cmd, event, function () { console.log("sendCommand", cmd, event);});
+  chrome.debugger.sendCommand({tabId: tabId}, cmd, event, function () {
+    console.log("sendCommand", cmd, event);
+  });
 }
-
-chrome.runtime.onMessage.addListener(function handleMessage(request, sender, sendResponse) {
-  //filtering out inactive tabs
-  var tabId = sender.tab.id;
-  if (!activeTabs[tabId])
-    return;
-  console.log("received request from clientScript on active tab", request);
-  dispatchNativeEvent(request, tabId);
-});
-// console.log("background.js is up and running.");

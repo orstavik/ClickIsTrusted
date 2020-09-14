@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Test of ClickIsTrusted</title>
+</head>
+<body>
+<h1>dblclick to run the test.</h1>
+
+<input type="text" value="hello sunshine!">
+<script>
+
+  const input = document.querySelector("input");
+  function run() {
+
+    input.focus();
+
+    setTimeout(function () {
+      window.addEventListener("beforeinput", function (e) {
+        console.log(
+          e.type,
+          e.isTrusted,
+          e.composed,
+          e.bubbles,
+          e.data === "a",
+          // e.keyCode === 0, //this isn't set
+          e.target === input,
+          e);
+      });
+
+      const keyA = new InputEvent("beforeinput-is-trusted", {
+        data: "a"
+      });
+      window.dispatchEvent(keyA);
+    }, 0);
+
+    setTimeout(function () {
+      window.addEventListener("beforeinput", function (e) {
+        console.log(
+          e.type,
+          e.isTrusted,
+          e.composed,
+          e.bubbles,
+          e.data === "Bc",
+          // e.keyCode === 0, //this isn't set
+          e.target === input,
+          e);
+      });
+
+      const keyBc = new InputEvent("beforeinput-is-trusted", {
+        data: "Bc"
+      });
+      window.dispatchEvent(keyBc);
+    }, 0);
+
+  }
+
+  window.addEventListener("dblclick", run);
+</script>
+</body>
+</html>
