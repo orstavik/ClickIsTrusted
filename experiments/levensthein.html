@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+<script>
+
+  function lowestTopLeft(res, i, j) {
+    const left = res[i - 1][j];
+    const topLeft = res[i - 1][j - 1];
+    const top = res[i][j - 1];
+    return Math.min(left, Math.min(topLeft, top));
+  }
+
+  function levTable(a, b) {
+    const res = new Array(b.length + 1);
+    //1. make default rows
+    for (let i = 0; i < b.length + 1; i++) res[i] = [i];
+    for (let i = 1; i < a.length + 1; i++) res[0][i] = i;
+
+    //2. filling the body.
+    for (let i = 1; i < b.length + 1; i++) {
+      for (let j = 1; j < a.length + 1; j++) {
+        res[i][j] = lowestTopLeft(res, i, j) + (b[i - 1] !== a[j - 1]) * 1;
+      }
+    }
+    return res;
+  }
+
+  // function lowestBottomRight(res, i, j/*, preference*/) {
+  //   const now = res[i][j];
+  //   const right = res[i + 1][j];
+  //   const bottomRight = res[i + 1][j + 1];
+  //   const bottom = res[i][j + 1];
+  //   if (now === bottomRight)
+  //     return null;
+  //   if (bottom <= bottomRight && bottom <= right)
+  //     return ["add", i, j];
+  //   if (right <= bottomRight)
+  //     return ["remove", i, j];
+  //   return ["replace", i, j];
+  // }
+  //
+
+  function lowestTopLeftAction(res, i, j) {
+    const now = res[i][j];
+    const left = res[i - 1][j];
+    const topLeft = res[i - 1][j - 1];
+    const top = res[i][j - 1];
+    if (topLeft <= top && topLeft <= left)
+      return [now === topLeft ? "match" : "replace", i - 1, j - 1];
+    if (top <= left)
+      return ["insert", i, j - 1];
+    return ["delete", i - 1, j];
+  }
+
+  function operationList(table, i, j, strX, strY) {
+    if (i === 0 && j === 0)
+      return [];
+    const [op, nextI, nextJ] = lowestTopLeftAction(table, i, j);
+    const res = operationList(table, nextI, nextJ, strX, strY);
+    if (op !== "match")
+      res.push([op, nextJ, strX[nextJ]]);  // res.push([op, nextJ, strX[nextJ], nextI, strY[nextI]]);
+    return res;
+  }
+
+  const strX = "abcdef";
+  const strY = "aaazced";
+  const table = levTable(strX, strY);
+  console.table(table);
+  const opList = operationList(table, strY.length, strX.length, strX, strY);
+  console.table(opList);
+
+  function convert(opList, strY) {
+    strY = strY.split("");
+    for (let [operation, index, character] of opList) {
+       if(operation === "replace")
+         strY.splice(index, 1, character);
+       if(operation=== "insert")
+         strY.splice(index, 0, character);
+       if(operation === "delete")
+         strY.splice(index, 1);
+    }
+    return strY.join("");
+  }
+
+  const altered = convert(opList, strY);
+  console.log(altered);
+
+  //todo test with bigger texts.
+  //todo how is performance, can we check with very big strings??
+
+  //todo merge similar operations into one, to get fewer operations
+  //todo are there any mechanisms we want to make the list of operations cleaner?? preferance for match direction??
+
+</script>
+</body>
+</html>
