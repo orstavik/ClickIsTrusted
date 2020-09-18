@@ -61,12 +61,12 @@
   function convert(opList, strY) {
     strY = strY.split("");
     for (let [operation, index, character] of opList) {
-       if(operation === "replace")
-         strY.splice(index, 1, character);
-       if(operation=== "insert")
-         strY.splice(index, 0, character);
-       if(operation === "delete")
-         strY.splice(index, 1);
+      if (operation === "replace")
+        strY.splice(index, character.length, character);
+      if (operation === "insert")
+        strY.splice(index, 0, character);
+      if (operation === "delete")
+        strY.splice(index, character.length);
     }
     return strY.join("");
   }
@@ -74,10 +74,31 @@
   const altered = convert(opList, strY);
   console.log(altered);
 
+  function minimizeOpList(opList) {
+    //convert the value of the delete to be the default value of 1 character
+    // opList.filter(op => op[0] === "delete").forEach(op => op[2] = 1);
+
+    const res = [];
+    let prevOp;
+    for (let op of opList) {
+      if (prevOp && prevOp[0] === op[0]) {
+        prevOp[2] += op[2];
+      } else {
+        prevOp = op;
+        res.push(op);
+      }
+    }
+    return res;
+  }
+
+  const ops = minimizeOpList(opList);
+  console.table(ops);
+  const altered2 = convert(ops, strY);
+  console.log(altered2);
+
   //todo test with bigger texts.
   //todo how is performance, can we check with very big strings??
 
-  //todo merge similar operations into one, to get fewer operations
   //todo are there any mechanisms we want to make the list of operations cleaner?? preferance for match direction??
 
 </script>
