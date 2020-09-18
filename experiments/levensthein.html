@@ -11,7 +11,7 @@
     const left = res[i - 1][j];
     const topLeft = res[i - 1][j - 1];
     const top = res[i][j - 1];
-    return Math.min(left, Math.min(topLeft, top));
+    return Math.min(left, Math.min(topLeft, top));//todo make this more efficient??
   }
 
   function levTable(a, b) {
@@ -23,26 +23,11 @@
     //2. filling the body.
     for (let i = 1; i < b.length + 1; i++) {
       for (let j = 1; j < a.length + 1; j++) {
-        res[i][j] = lowestTopLeft(res, i, j) + (b[i - 1] !== a[j - 1]) * 1;
+        res[i][j] = lowestTopLeft(res, i, j) + (b[i - 1] !== a[j - 1]) * 1;//todo is there a simpler way to make boolean test === into number 0 or 1??
       }
     }
     return res;
   }
-
-  // function lowestBottomRight(res, i, j/*, preference*/) {
-  //   const now = res[i][j];
-  //   const right = res[i + 1][j];
-  //   const bottomRight = res[i + 1][j + 1];
-  //   const bottom = res[i][j + 1];
-  //   if (now === bottomRight)
-  //     return null;
-  //   if (bottom <= bottomRight && bottom <= right)
-  //     return ["add", i, j];
-  //   if (right <= bottomRight)
-  //     return ["remove", i, j];
-  //   return ["replace", i, j];
-  // }
-  //
 
   function lowestTopLeftAction(res, i, j) {
     const now = res[i][j];
