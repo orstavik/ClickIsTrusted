@@ -41,22 +41,15 @@
     return ["delete", i - 1, j];
   }
 
-  function operationList(table, i, j, strX, strY) {
+  function characterOperations(table, i, j, strX) {
     if (i === 0 && j === 0)
       return [];
     const [op, nextI, nextJ] = lowestTopLeftAction(table, i, j);
-    const res = operationList(table, nextI, nextJ, strX, strY);
+    const res = characterOperations(table, nextI, nextJ, strX);
     if (op !== "match")
-      res.push([op, nextJ, strX[nextJ]]);  // res.push([op, nextJ, strX[nextJ], nextI, strY[nextI]]);
+      res.push([op, nextJ, strX[nextJ]]);
     return res;
   }
-
-  const strX = "abcdef";
-  const strY = "aaazced";
-  const table = levTable(strX, strY);
-  console.table(table);
-  const opList = operationList(table, strY.length, strX.length, strX, strY);
-  console.table(opList);
 
   function convert(opList, strY) {
     strY = strY.split("");
@@ -71,33 +64,37 @@
     return strY.join("");
   }
 
-  const altered = convert(opList, strY);
-  console.log(altered);
-
-  function minimizeOpList(opList) {
+  function stringOperations(opList) {
     const res = [];
     let prevOp;
     for (let op of opList) {
-      if (prevOp && prevOp[0] === op[0]) {
+      if (prevOp && prevOp[0] === op[0])
         prevOp[2] += op[2];
-      } else {
-        prevOp = op;
-        res.push(op);
-      }
+      else
+        res.push(prevOp = op);
     }
     return res;
   }
 
-  const ops = minimizeOpList(opList);
-  console.table(ops);
-  const altered2 = convert(ops, strY);
+  const strX = "abcdef", strY = "aaazced";
+
+  const table = levTable(strX, strY);
+  console.table(table);
+
+  const opsChar = characterOperations(table, strY.length, strX.length, strX);
+  console.table(opsChar);
+
+  const opsString = stringOperations(opsChar);
+  console.table(opsString);
+
+  const altered = convert(opsChar, strY);
+  console.log(altered);
+
+  const altered2 = convert(opsString, strY);
   console.log(altered2);
 
-  //todo test with bigger texts.
-  //todo how is performance, can we check with very big strings??
-
-  //todo are there any mechanisms we want to make the list of operations cleaner?? preferance for match direction??
-
+  //todo test with bigger texts and test performance. How big are the strings when things get heavy??
+  //todo priority mechanisms to make the list of operations cleaner?? preferance for match direction etc??
 </script>
 </body>
 </html>
