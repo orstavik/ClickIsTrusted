@@ -14,7 +14,7 @@ function levTable(a, b) {
   return res;
 }
 
-function lowestTopLeftAction(res, i, j) {
+function lowestTopLeftAction(res, i, j, preference) {
   if (j === 0)
     return ["delete", i - 1, j];
   if (i === 0)
@@ -30,11 +30,11 @@ function lowestTopLeftAction(res, i, j) {
   return ["delete", i - 1, j];
 }
 
-function charOps(table, i, j, strX) {
+function charOps(table, i, j, strX, prevOp) {
   if (i === 0 && j === 0)
     return [];
-  const [op, nextI, nextJ] = lowestTopLeftAction(table, i, j);
-  const res = charOps(table, nextI, nextJ, strX); //todo pass in the op here, so it can be used by the next lowestTopLeftAction??
+  const [op, nextI, nextJ] = lowestTopLeftAction(table, i, j, prevOp);
+  const res = charOps(table, nextI, nextJ, strX, op); //todo pass in the op here, so it can be used by the next lowestTopLeftAction??
   if (op !== "match")                             //todo we could merge the charOps into string ops here??
     res.push([op, nextJ, strX[nextJ]]);
   return res;
@@ -79,5 +79,5 @@ export function convert(str, levyOps) {
 
 export function diff(a, b) {
   const table = levTable(a, b);
-  return stringOps(charOps(table, b.length, a.length, a));
+  return stringOps(charOps(table, b.length, a.length, a, undefined));
 }

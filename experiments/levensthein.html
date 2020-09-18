@@ -10,9 +10,11 @@
 
   const tests = [
     ["aaazced", "abcdef"],
-    // ["abcdef", "aaazced"],
-    // ["asab", "saab"],
-    // ["saab", "asab"],
+    ["abcdef", "aaazced"],
+    ["asab", "saab"],
+    ["saab", "asab"],
+    ["abcabcdef", "abcdef"],  //todo "aBCAbcdef" => "abcABCdef" preference for late edits.
+    ["abcdef", "abcabcdef"],  //todo "aBCAbcdef" => "abcABCdef" preference for late edits.
   ];
 
   for (let [end, begin] of tests) {
@@ -23,9 +25,7 @@
       console.table(opsString);
     }
   }
-
   //todo test with bigger texts and test performance. How big are the strings when things get heavy??
-  //todo priority mechanisms to make the list of operations cleaner?? preferance for match direction etc??
 </script>
 </body>
 </html>
