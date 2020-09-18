@@ -15,15 +15,18 @@
     ["saab", "asab"],
     ["abcabcdef", "abcdef"],  //todo "aBCAbcdef" => "abcABCdef" preference for late edits.
     ["abcdef", "abcabcdef"],  //todo "aBCAbcdef" => "abcABCdef" preference for late edits.
+    ["ab", "abab"],           //todo ??"aBAb" => "abAB" preference for late edits.
   ];
 
   for (let [end, begin] of tests) {
+    let start = performance.now();
     const opsString = diff(end, begin);
     const reA = convert(begin, opsString);
     if (end !== reA) {
       console.log(end, begin, reA);
       console.table(opsString);
     }
+    console.log(performance.now() - start);
   }
   //todo test with bigger texts and test performance. How big are the strings when things get heavy??
 </script>
