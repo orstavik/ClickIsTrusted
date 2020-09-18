@@ -5,93 +5,24 @@
   <title>Title</title>
 </head>
 <body>
-<script>
+<script type="module">
+  import {diff, convert} from "./levyLifting.js";
 
-  function lowestTopLeft(res, i, j) {
-    const left = res[i - 1][j];
-    const topLeft = res[i - 1][j - 1];
-    const top = res[i][j - 1];
-    return Math.min(left, Math.min(topLeft, top));//todo make this more efficient??
-  }
+  const tests = [
+    ["aaazced", "abcdef"],
+    // ["abcdef", "aaazced"],
+    // ["asab", "saab"],
+    // ["saab", "asab"],
+  ];
 
-  function levTable(a, b) {
-    const res = new Array(b.length + 1);
-    //1. make default rows
-    for (let i = 0; i < b.length + 1; i++) res[i] = [i];
-    for (let i = 1; i < a.length + 1; i++) res[0][i] = i;
-
-    //2. filling the body.
-    for (let i = 1; i < b.length + 1; i++) {
-      for (let j = 1; j < a.length + 1; j++) {
-        res[i][j] = lowestTopLeft(res, i, j) + (b[i - 1] !== a[j - 1]) * 1;//todo is there a simpler way to make boolean test === into number 0 or 1??
-      }
+  for (let [end, begin] of tests) {
+    const opsString = diff(end, begin);
+    const reA = convert(begin, opsString);
+    if (end !== reA) {
+      console.log(end, begin, reA);
+      console.table(opsString);
     }
-    return res;
   }
-
-  function lowestTopLeftAction(res, i, j) {
-    const now = res[i][j];
-    const left = res[i - 1][j];
-    const topLeft = res[i - 1][j - 1];
-    const top = res[i][j - 1];
-    if (topLeft <= top && topLeft <= left)
-      return [now === topLeft ? "match" : "replace", i - 1, j - 1];
-    if (top <= left)
-      return ["insert", i, j - 1];
-    return ["delete", i - 1, j];
-  }
-
-  function characterOperations(table, i, j, strX) {
-    if (i === 0 && j === 0)
-      return [];
-    const [op, nextI, nextJ] = lowestTopLeftAction(table, i, j);
-    const res = characterOperations(table, nextI, nextJ, strX);
-    if (op !== "match")
-      res.push([op, nextJ, strX[nextJ]]);
-    return res;
-  }
-
-  function convert(opList, strY) {
-    strY = strY.split("");
-    for (let [operation, index, character] of opList) {
-      if (operation === "replace")
-        strY.splice(index, character.length, character);
-      if (operation === "insert")
-        strY.splice(index, 0, character);
-      if (operation === "delete")
-        strY.splice(index, character.length);
-    }
-    return strY.join("");
-  }
-
-  function stringOperations(opList) {
-    const res = [];
-    let prevOp;
-    for (let op of opList) {
-      if (prevOp && prevOp[0] === op[0])
-        prevOp[2] += op[2];
-      else
-        res.push(prevOp = op);
-    }
-    return res;
-  }
-
-  const strX = "abcdef", strY = "aaazced";
-
-  const table = levTable(strX, strY);
-  console.table(table);
-
-  const opsChar = characterOperations(table, strY.length, strX.length, strX);
-  console.table(opsChar);
-
-  const opsString = stringOperations(opsChar);
-  console.table(opsString);
-
-  const altered = convert(opsChar, strY);
-  console.log(altered);
-
-  const altered2 = convert(opsString, strY);
-  console.log(altered2);
 
   //todo test with bigger texts and test performance. How big are the strings when things get heavy??
   //todo priority mechanisms to make the list of operations cleaner?? preferance for match direction etc??
