@@ -35,6 +35,7 @@ function charOps(table, i, j, strX, prevOp) {
     return [];
   const [op, nextI, nextJ] = lowestTopLeftAction(table, i, j, prevOp);
   const res = charOps(table, nextI, nextJ, strX, op); //todo pass in the op here, so it can be used by the next lowestTopLeftAction??
+  //todo do not remove the matches here??
   if (op !== "match")                             //todo we could merge the charOps into string ops here??
     res.push([op, nextJ, strX[nextJ]]);
   return res;
@@ -58,6 +59,7 @@ export function convert(str, levyOps) {
       str.splice(index, 0, ...chars);
     else if (op === "delete")
       str.splice(index, chars.length);
+    //todo add match here??
   }
   return str.join("");
 }
