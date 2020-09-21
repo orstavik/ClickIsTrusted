@@ -6,7 +6,8 @@
 </head>
 <body>
 <script type="module">
-  import {diff, convert} from "./levyLifting.js";
+  import {levenshtein} from "./levyLifting.js";
+  import {unify, convert} from "./levyUnify.js";
 
   const tests2 = [
     ["aaazced", "abcdef", [["insert", 1, "aa"], ["substitute", 3, "z"], ["delete", 5, "d"], ["substitute", 6, "d"]]],
@@ -35,7 +36,8 @@
 
   for (let [end, begin, expectedResult] of tests2) {
     let start = performance.now();
-    const opsString = diff(end, begin);
+    const ops = levenshtein(end, begin);
+    const opsString = unify(ops);
     const reA = convert(begin, opsString);
     const strMatches = end === reA;
     const arrayMatches = compareTwoArrays(opsString, expectedResult);
