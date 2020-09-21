@@ -38,7 +38,7 @@ function charOps(table, i, j, strX, strY) {
   const [op, nextI, nextJ] = lowestTopLeftAction(table, i, j);
   const res = charOps(table, nextI, nextJ, strX, strY);
   res.push([op, nextJ, op === 'D' ? strY[nextI] : strX[nextJ]]);
-  return res;
+  return res.reverse();
 }
 
 export function levenshtein(a, b) {
