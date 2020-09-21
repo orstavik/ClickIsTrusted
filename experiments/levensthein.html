@@ -31,7 +31,7 @@
   ];
 
   function compareTwoArrays(opsString, expectedResult) {
-    return true;
+    return JSON.stringify(opsString) === JSON.stringify(expectedResult);
   }
 
   for (let [end, begin, expectedResult] of tests2) {
