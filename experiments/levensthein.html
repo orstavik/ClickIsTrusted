@@ -30,17 +30,13 @@
 
   ];
 
-  function compareTwoArrays(opsString, expectedResult) {
-    return JSON.stringify(opsString) === JSON.stringify(expectedResult);
-  }
-
   for (let [end, begin, expectedResult] of tests2) {
     let start = performance.now();
     const ops = levenshtein(end, begin);
     const opsString = unify(ops);
     const reA = convert(begin, opsString);
     const strMatches = end === reA;
-    const arrayMatches = compareTwoArrays(opsString, expectedResult);
+    const arrayMatches = JSON.stringify(opsString) === JSON.stringify(expectedResult);
     //check for matching operation arrays
     if (strMatches && arrayMatches)
       continue;
