@@ -10,10 +10,10 @@ function cleanMatchInTheMiddle(strOps) {
   const res = [];
   for (let i = 0; i < strOps.length; i++) {
     const [middleOp, middleIndex, middleStr] = strOps[i];
-    if (i > 0 && i < strOps.length - 1 && middleOp === "match") {
+    if (i > 0 && i < strOps.length - 1 && middleOp === 'M') {
       const [beforeOp, beforeIndex, beforeStr] = strOps[i - 1];
       const [afterOp, afterIndex, afterStr] = strOps[i + 1];
-      if (beforeOp === "insert" && afterOp === "insert") {
+      if (beforeOp === 'I' && afterOp === 'I') {
         if (afterStr.endsWith(middleStr)) {
 
           res[res.length - 1][2] += middleStr + afterStr.substr(0, afterStr.length - middleStr.length);
@@ -42,9 +42,9 @@ function cleanMoveOperationsToTheEnd(strOps) {
   const res = [];
   for (let i = 0; i < strOps.length; i++) {
     let [firstOp, firstIndex, firstStr] = strOps[i];
-    if ((firstOp === "insert" || firstOp === "delete") && i < strOps.length - 1) {
+    if ((firstOp === 'I' || firstOp === 'D') && i < strOps.length - 1) {
       let [secondOp, secondIndex, secondStr] = strOps[i + 1];
-      if (secondOp === "match") {
+      if (secondOp === 'M') {
         //if the head of the insert matches the head of the match, this is called overlap
         const overlapStr = headMatch(firstStr, secondStr);
         if (overlapStr !== "") {
@@ -52,7 +52,7 @@ function cleanMoveOperationsToTheEnd(strOps) {
           firstStr = firstStr.substr(overlapStr.length) + overlapStr;
           secondIndex += overlapStr.length;
           secondStr = secondStr.substr(overlapStr.length);
-          res.push(["match", firstIndex-overlapStr.length, overlapStr]);
+          res.push(['M', firstIndex-overlapStr.length, overlapStr]);
           res.push([firstOp, firstIndex, firstStr]);
           res.push([secondOp, secondIndex, secondStr]);
           i++;
@@ -71,18 +71,18 @@ export function unify(levenshteinOps) {
   //todo both cleaning operations might leave two insert, two matches, two delete, two substitute operations side by side. These operations should be merged.
   const clean2 = cleanMoveOperationsToTheEnd(clean1);
   //todo both cleaning operations might create two operations side by side. These operations should be merged.
-  return clean2.filter(([op, index, str]) => op !== "match");
+  return clean2.filter(([op, index, str]) => op !== 'M');
 }
 
 export function convert(str, levyOps) {
   str = str.split("");
   for (let [op, index, chars] of levyOps) {
     chars = chars.split("");
-    if (op === "substitute")
+    if (op === 'S')
       str.splice(index, chars.length, ...chars);
-    else if (op === "insert")
+    else if (op === 'I')
       str.splice(index, 0, ...chars);
-    else if (op === "delete")
+    else if (op === 'D')
       str.splice(index, chars.length);
   }
   return str.join("");
@@ -92,9 +92,9 @@ export function convert(str, levyOps) {
 //   const substitutes = levyOps.map(([op, index, chars]) => {
 //     if (op === "substitute")
 //       return [index, chars.length, chars];
-//     if (op === "insert")
+//     if (op === 'I')
 //       return [index, 0, chars];
-//     if (op === "delete")
+//     if (op === 'D')
 //       return [index, chars.length];
 //   });
 //   str = str.split("");

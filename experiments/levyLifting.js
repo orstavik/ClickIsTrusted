@@ -14,20 +14,21 @@ function levTable(a, b) {
   return res;
 }
 
+//Delete, Insert, Substitute, Match
 function lowestTopLeftAction(res, i, j) {
   if (j === 0)
-    return ["delete", i - 1, j];
+    return ['D', i - 1, j];
   if (i === 0)
-    return ["insert", i, j - 1];
+    return ['I', i, j - 1];
   const now = res[i][j];
   const left = res[i - 1][j];
   const topLeft = res[i - 1][j - 1];
   const top = res[i][j - 1];
   if (topLeft <= top && topLeft <= left)
-    return [now === topLeft ? "match" : "substitute", i - 1, j - 1];
+    return [now === topLeft ? 'M' : 'S', i - 1, j - 1];
   if (top <= left)
-    return ["insert", i, j - 1];
-  return ["delete", i - 1, j];
+    return ['I', i, j - 1];
+  return ['D', i - 1, j];
 }
 
 //todo make charOps iterate, not recursive
@@ -36,7 +37,7 @@ function charOps(table, i, j, strX, strY) {
     return [];
   const [op, nextI, nextJ] = lowestTopLeftAction(table, i, j);
   const res = charOps(table, nextI, nextJ, strX, strY);
-  res.push([op, nextJ, op === "delete" ? strY[nextI] : strX[nextJ]]);
+  res.push([op, nextJ, op === 'D' ? strY[nextI] : strX[nextJ]]);
   return res;
 }
 
