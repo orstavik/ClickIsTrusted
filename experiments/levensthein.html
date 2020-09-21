@@ -8,32 +8,41 @@
 <script type="module">
   import {diff, convert} from "./levyLifting.js";
 
-  const tests = [
-    ["aaazced", "abcdef"],
-    ["abcdef", "aaazced"],
-    ["asab", "saab"],
-    ["saab", "asab"],
-    ["abcabcdef", "abcdef"],  //todo "aBCAbcdef" => "abcABCdef" preference for late edits.
-    ["abcdef", "abcabcdef"],  //todo "aBCAbcdef" => "abcABCdef" preference for late edits.
-    ["ab", "abab"],           //todo ?? index should be 2, not 1... "aBAb" => "abAB" preference for late edits.
-    ["3a3a", "a"],            //todo ?? one insert op, not two '3'a'3A' => '3A3'a'
-
+  const tests2 = [
+    ["aaazced", "abcdef", [["insert", 1, "aa"], ["substitute", 3, "z"], ["delete", 5, "d"], ["substitute", 6, "d"]]],
+    ["abcdef", "aaazced", [["delete", 1, "aa"], ["substitute", 1, "b"], ["insert", 3, "d"], ["substitute", 5, "f"]]],
+    ["asab", "saab", [["insert", 0, "a"], ["delete", 3, "a"]]],
+    ["saab", "asab", [["delete", 0, "a"], ["insert", 2, "a"]]],
+    ["abcabcdef", "abcdef", [["insert", 3, "abc"]]],
+    ["abcdef", "abcabcdef", [["delete", 3, "abc"]]],
+    ["ab", "abab", [["delete", 1, "ba"]]],
+    ["3a3a", "a", [["insert", 0, "3a3"]]]
 
     // abcd---efghijk---opq---rstuv---wxyz
     // bcd---eefh1j---ooq---rrsu2---wxy
+
     // abcd---efghijk---opq---rstuv---wxyz
     // aabcd---eefh1j---ooq---rrsu2---wxyzz
+
     // abcd---efghijk---opq---rstuv---wxyz
     // 3a3abcd---eefh1j---ooq---rrsu2---wxy4z4z
+
   ];
 
-  for (let [end, begin] of tests) {
+  function compareTwoArrays(opsString, expectedResult) {
+    return true;
+  }
+
+  for (let [end, begin, expectedResult] of tests2) {
     let start = performance.now();
     const opsString = diff(end, begin);
     const reA = convert(begin, opsString);
-    // if (end === reA)
-    //   continue;
-    console.log(end, begin, reA, end === reA);
+    const strMatches = end === reA;
+    const arrayMatches = compareTwoArrays(opsString, expectedResult);
+    //check for matching operation arrays
+    if (strMatches && arrayMatches)
+      continue;
+    console.log(end, begin, reA, strMatches, arrayMatches);
     console.table(opsString);
     console.log(performance.now() - start);
   }

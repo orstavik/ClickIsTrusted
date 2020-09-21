@@ -111,7 +111,9 @@ export function diff(a, b) {
   const table = levTable(a, b);
   const strOps = stringOps(charOps(table, b.length, a.length, a, b));
   const clean1 = cleanMatchInTheMiddle(strOps);
+  //todo both cleaning operations might leave two insert, two matches, two delete, two substitute operations side by side. These operations should be merged.
   const clean2 = cleanMoveOperationsToTheEnd(clean1);
+  //todo both cleaning operations might create two operations side by side. These operations should be merged.
   return clean2.filter(([op, index, str]) => op !== "match");
 }
 
