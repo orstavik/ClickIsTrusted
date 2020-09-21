@@ -33,12 +33,13 @@ function lowestTopLeftAction(res, i, j) {
 
 //todo make charOps iterate, not recursive
 function charOps(table, i, j, strX, strY) {
-  if (i === 0 && j === 0)
-    return [];
-  const [op, nextI, nextJ] = lowestTopLeftAction(table, i, j);
-  const res = charOps(table, nextI, nextJ, strX, strY);
-  res.push([op, nextJ, op === 'D' ? strY[nextI] : strX[nextJ]]);
-  return res;
+let res = [];
+  while (i !== 0 && j !== 0) {
+    const [op, nextI, nextJ] = lowestTopLeftAction(table, i, j);
+    i = nextI;
+    j = nextJ;
+    res.unshift([op, nextJ, op === "D" ? strY[nextI] : strX[nextJ]]);
+  }
 }
 
 export function levenshtein(a, b) {
