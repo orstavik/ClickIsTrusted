@@ -14,7 +14,7 @@ function levTable(a, b) {
   return res;
 }
 
-function lowestTopLeftAction(res, i, j, preference) {
+function lowestTopLeftAction(res, i, j) {
   if (j === 0)
     return ["delete", i - 1, j];
   if (i === 0)
@@ -31,12 +31,12 @@ function lowestTopLeftAction(res, i, j, preference) {
 }
 
 //todo make charOps iterate, not recursive
-function charOps(table, i, j, strX, prevOp) {
+function charOps(table, i, j, strX, strY) {
   if (i === 0 && j === 0)
     return [];
-  const [op, nextI, nextJ] = lowestTopLeftAction(table, i, j, prevOp);
-  const res = charOps(table, nextI, nextJ, strX, op);
-  res.push([op, nextJ, strX[nextJ]]);
+  const [op, nextI, nextJ] = lowestTopLeftAction(table, i, j);
+  const res = charOps(table, nextI, nextJ, strX, strY);
+  res.push([op, nextJ, op === "delete" ? strY[nextI] : strX[nextJ]]);
   return res;
 }
 
@@ -84,7 +84,7 @@ function cleanMoveOperationsToTheEnd(strOps) {
   const res = [];
   for (let i = 0; i < strOps.length; i++) {
     let [firstOp, firstIndex, firstStr] = strOps[i];
-    if (firstOp === "insert" && i < strOps.length - 1) {
+    if ((firstOp === "insert" || firstOp === "delete") && i < strOps.length - 1) {
       let [secondOp, secondIndex, secondStr] = strOps[i + 1];
       if (secondOp === "match") {
         //if the head of the insert matches the head of the match, this is called overlap
@@ -109,7 +109,7 @@ function cleanMoveOperationsToTheEnd(strOps) {
 
 export function diff(a, b) {
   const table = levTable(a, b);
-  const strOps = stringOps(charOps(table, b.length, a.length, a, undefined));
+  const strOps = stringOps(charOps(table, b.length, a.length, a, b));
   const clean1 = cleanMatchInTheMiddle(strOps);
   const clean2 = cleanMoveOperationsToTheEnd(clean1);
   return clean2.filter(([op, index, str]) => op !== "match");
