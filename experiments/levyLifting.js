@@ -30,14 +30,13 @@ function lowestTopLeftAction(res, i, j, preference) {
   return ["delete", i - 1, j];
 }
 
+//todo make charOps iterate, not recursive
 function charOps(table, i, j, strX, prevOp) {
   if (i === 0 && j === 0)
     return [];
   const [op, nextI, nextJ] = lowestTopLeftAction(table, i, j, prevOp);
-  const res = charOps(table, nextI, nextJ, strX, op); //todo pass in the op here, so it can be used by the next lowestTopLeftAction??
-  //todo do not remove the matches here??
-  if (op !== "match")                             //todo we could merge the charOps into string ops here??
-    res.push([op, nextJ, strX[nextJ]]);
+  const res = charOps(table, nextI, nextJ, strX, op);
+  res.push([op, nextJ, strX[nextJ]]);
   return res;
 }
 
@@ -47,6 +46,73 @@ function stringOps(charOps) {
   for (let op of charOps)
     prevOp[0] === op[0] ? prevOp[2] += op[2] : res.push(prevOp = op);
   return res;
+}
+
+function cleanMatchInTheMiddle(strOps) {
+  const res = [];
+  for (let i = 0; i < strOps.length; i++) {
+    const [middleOp, middleIndex, middleStr] = strOps[i];
+    if (i > 0 && i < strOps.length - 1 && middleOp === "match") {
+      const [beforeOp, beforeIndex, beforeStr] = strOps[i - 1];
+      const [afterOp, afterIndex, afterStr] = strOps[i + 1];
+      if (beforeOp === "insert" && afterOp === "insert") {
+        if (afterStr.endsWith(middleStr)) {
+
+          res[res.length - 1][2] += middleStr + afterStr.substr(0, afterStr.length - middleStr.length);
+          res.push([middleOp, middleIndex + afterStr.length, middleStr]);
+          i++;
+          continue;
+        }
+      }
+    }
+    res.push(strOps[i]); //todo, make res and strOps immutable by cloning the array here??
+  }
+  return res;
+  //todo, there might be two match operations here that are not inline..
+}
+
+function headMatch(a, b) {
+  const length = Math.min(a.length, b.length);
+  for (let j = 0; j < length; j++) {
+    if (a[j] !== b[j])
+      return a.substr(0, j);
+  }
+  return a.substr(0, length - 1);
+}
+
+function cleanMoveOperationsToTheEnd(strOps) {
+  const res = [];
+  for (let i = 0; i < strOps.length; i++) {
+    let [firstOp, firstIndex, firstStr] = strOps[i];
+    if (firstOp === "insert" && i < strOps.length - 1) {
+      let [secondOp, secondIndex, secondStr] = strOps[i + 1];
+      if (secondOp === "match") {
+        //if the head of the insert matches the head of the match, this is called overlap
+        const overlapStr = headMatch(firstStr, secondStr);
+        if (overlapStr !== "") {
+          firstIndex += overlapStr.length;
+          firstStr = firstStr.substr(overlapStr.length) + overlapStr;
+          secondIndex += overlapStr.length;
+          secondStr = secondStr.substr(overlapStr.length);
+          res.push(["match", firstIndex-overlapStr.length, overlapStr]);
+          res.push([firstOp, firstIndex, firstStr]);
+          res.push([secondOp, secondIndex, secondStr]);
+          i++;
+          continue;
+        }
+      }
+    }
+    res.push(strOps[i]); //todo, make res and strOps immutable by cloning the array here??
+  }
+  return res;
+}
+
+export function diff(a, b) {
+  const table = levTable(a, b);
+  const strOps = stringOps(charOps(table, b.length, a.length, a, undefined));
+  const clean1 = cleanMatchInTheMiddle(strOps);
+  const clean2 = cleanMoveOperationsToTheEnd(clean1);
+  return clean2.filter(([op, index, str]) => op !== "match");
 }
 
 export function convert(str, levyOps) {
@@ -59,7 +125,6 @@ export function convert(str, levyOps) {
       str.splice(index, 0, ...chars);
     else if (op === "delete")
       str.splice(index, chars.length);
-    //todo add match here??
   }
   return str.join("");
 }
@@ -78,8 +143,3 @@ export function convert(str, levyOps) {
 //     str.splice(...args);
 //   return str.join("");
 // }
-
-export function diff(a, b) {
-  const table = levTable(a, b);
-  return stringOps(charOps(table, b.length, a.length, a, undefined));
-}
