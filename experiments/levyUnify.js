@@ -6,7 +6,19 @@ function stringOps(charOps) {
   return res;
 }
 
-function cleanMatchInTheMiddle3(ops) {
+function headMatch(a, b) {
+  const length = Math.min(a.length, b.length);
+  for (let j = 0; j < length; j++) {
+    if (a[j] !== b[j])
+      return a.substr(0, j);
+  }
+  return a.substr(0, length - 1);
+}
+
+
+//todo both cleaning operations might create two operations side by side. These operations should be merged.
+
+function cleanLevenshtein(ops) {
   const res = [];
   for (let i = 0; i < ops.length; i++) {
     const [oneOp, oneIndex, oneStr] = ops[i];
@@ -18,65 +30,8 @@ function cleanMatchInTheMiddle3(ops) {
       i += 2;
       continue;
     }
-    // if (oneOp === 'I' && (twoOp === 'M' || twoOp === 'D')) {
-    //   const overlapStr = headMatch(oneStr, twoStr);
-    //   if (overlapStr !== "") {
-    //     oneIndex += overlapStr.length;
-    //     oneStr = oneStr.substr(overlapStr.length) + overlapStr;
-    //     twoIndex += overlapStr.length;
-    //     twoStr = twoStr.substr(overlapStr.length);
-    //     res.push(['M', oneIndex - overlapStr.length, overlapStr]);
-    //     res.push([oneOp, oneIndex, oneStr]);
-    //     res.push([twoOp, twoIndex, twoStr]);
-    //     i++;
-    //     continue;
-    //   }
-    // }
-    res.push(ops[i]);
-  }
-  return res;
-}
-
-//
-// function cleanMatchInTheMiddle(strOps) {
-//   const res = [];
-//   for (let i = 0; i < strOps.length; i++) {
-//     const [middleOp, middleIndex, middleStr] = strOps[i];
-//     if (i > 0 && i < strOps.length - 1 && middleOp === 'M') {
-//       const [beforeOp, beforeIndex, beforeStr] = strOps[i - 1];
-//       const [afterOp, afterIndex, afterStr] = strOps[i + 1];
-//       if (beforeOp === 'I' && afterOp === 'I') {
-//         if (afterStr.endsWith(middleStr)) {
-//
-//           res[res.length - 1][2] += middleStr + afterStr.substr(0, afterStr.length - middleStr.length);
-//           res.push([middleOp, middleIndex + afterStr.length, middleStr]);
-//           i++;
-//           continue;
-//         }
-//       }
-//     }
-//     res.push(strOps[i]); //todo, make res and strOps immutable by cloning the array here??
-//   }
-//   return res;
-//   //todo, there might be two match operations here that are not inline..
-// }
-//
-function headMatch(a, b) {
-  const length = Math.min(a.length, b.length);
-  for (let j = 0; j < length; j++) {
-    if (a[j] !== b[j])
-      return a.substr(0, j);
-  }
-  return a.substr(0, length - 1);
-}
-
-function cleanMoveOperationsToTheEnd(strOps) {
-  const res = [];
-  for (let i = 0; i < strOps.length; i++) {
-    let [firstOp, oneIndex, oneStr] = strOps[i];
-    let [secondOp, twoIndex, twoStr] = strOps[i + 1] || [];
-    if ((firstOp === 'I' || firstOp === 'D') && secondOp === 'M') {
-      //if the head of the insert matches the head of the match, this is called overlap
+    if ((oneOp === 'I' || oneOp === 'D') && twoOp === 'M') {
+      //if the head of the insert/delete matches the head of the match, this is called overlap
       const overlapStr = headMatch(oneStr, twoStr);
       if (overlapStr !== "") {
         const firstIndex = oneIndex + overlapStr.length;
@@ -84,31 +39,42 @@ function cleanMoveOperationsToTheEnd(strOps) {
         const secondIndex = twoIndex + overlapStr.length;
         const secondStr = twoStr.substr(overlapStr.length);
         res.push(['M', firstIndex - overlapStr.length, overlapStr]);
-        res.push([firstOp, firstIndex, firstStr]);
-        res.push([secondOp, secondIndex, secondStr]);
+        //todo this should most likely be added to the previous match, but it is not critical I think.
+        res.push([oneOp, firstIndex, firstStr]);
+        res.push([twoOp, secondIndex, secondStr]);
         i++;
         continue;
       }
     }
-    res.push(strOps[i]); //todo, make res and strOps immutable by cloning the array here??
+    if (oneOp === 'D' && twoOp === 'S' && oneIndex === twoIndex) {
+      res.push(['R', twoIndex, twoStr, twoStr.length + oneStr.length]);
+      i++;
+      continue;
+    }
+    if (oneOp === 'I' && twoOp === 'S' && oneIndex + oneStr.length === twoIndex) {
+      res.push(['R', oneIndex, oneStr + twoStr, twoStr.length]);
+      i++;
+      continue;
+    }
+    res.push(ops[i]);
   }
   return res;
 }
 
 export function unify(levenshteinOps) {
   const strOps = stringOps(levenshteinOps);
-  const clean1 = cleanMatchInTheMiddle3(strOps);
-  const clean2 = cleanMoveOperationsToTheEnd(clean1);
-  //todo both cleaning operations might create two operations side by side. These operations should be merged.
-  return clean2.filter(([op, index, str]) => op !== 'M');
+  const clean = cleanLevenshtein(strOps);
+  return clean.filter(([op, index, str]) => op !== 'M');
 }
 
 export function convert(str, levyOps) {
   str = str.split("");
-  for (let [op, index, chars] of levyOps) {
+  for (let [op, index, chars, length] of levyOps) {
     chars = chars.split("");
     if (op === 'S')
       str.splice(index, chars.length, ...chars);
+    if (op === 'R')
+      str.splice(index, length, ...chars);
     else if (op === 'I')
       str.splice(index, 0, ...chars);
     else if (op === 'D')
