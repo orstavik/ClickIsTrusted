@@ -6,29 +6,53 @@ function stringOps(charOps) {
   return res;
 }
 
-function cleanMatchInTheMiddle(strOps) {
+function cleanMatchInTheMiddle2(strOps) {
+  if (strOps.length < 3)
+    return strOps;
   const res = [];
-  for (let i = 0; i < strOps.length; i++) {
-    const [middleOp, middleIndex, middleStr] = strOps[i];
-    if (i > 0 && i < strOps.length - 1 && middleOp === 'M') {
-      const [beforeOp, beforeIndex, beforeStr] = strOps[i - 1];
-      const [afterOp, afterIndex, afterStr] = strOps[i + 1];
-      if (beforeOp === 'I' && afterOp === 'I') {
-        if (afterStr.endsWith(middleStr)) {
-
-          res[res.length - 1][2] += middleStr + afterStr.substr(0, afterStr.length - middleStr.length);
-          res.push([middleOp, middleIndex + afterStr.length, middleStr]);
-          i++;
-          continue;
-        }
+  for (let i = 2; i < strOps.length; i++) {
+    const [beforeOp, beforeIndex, beforeStr] = strOps[i - 2];
+    const [middleOp, middleIndex, middleStr] = strOps[i - 1];
+    const [afterOp, afterIndex, afterStr] = strOps[i];
+    if (beforeOp === 'I' && middleOp === 'M' && afterOp === 'I' && afterStr.endsWith(middleStr)) {
+      i += 2;
+      res.push([beforeOp, beforeIndex, beforeStr + middleStr + afterStr.substr(0, afterStr.length - middleStr.length)]);
+      res.push([middleOp, middleIndex + afterStr.length, middleStr]);
+      //todo, there is either nothing, or a match after this middleOp match. if there are two matches, they should be joined...
+    } else {
+      res.push(strOps[i - 2]);
+      if (i === strOps.length - 1) {
+        res.push(strOps[i - 1]);
+        res.push(strOps[i]);
       }
     }
-    res.push(strOps[i]); //todo, make res and strOps immutable by cloning the array here??
   }
   return res;
-  //todo, there might be two match operations here that are not inline..
 }
-
+//
+// function cleanMatchInTheMiddle(strOps) {
+//   const res = [];
+//   for (let i = 0; i < strOps.length; i++) {
+//     const [middleOp, middleIndex, middleStr] = strOps[i];
+//     if (i > 0 && i < strOps.length - 1 && middleOp === 'M') {
+//       const [beforeOp, beforeIndex, beforeStr] = strOps[i - 1];
+//       const [afterOp, afterIndex, afterStr] = strOps[i + 1];
+//       if (beforeOp === 'I' && afterOp === 'I') {
+//         if (afterStr.endsWith(middleStr)) {
+//
+//           res[res.length - 1][2] += middleStr + afterStr.substr(0, afterStr.length - middleStr.length);
+//           res.push([middleOp, middleIndex + afterStr.length, middleStr]);
+//           i++;
+//           continue;
+//         }
+//       }
+//     }
+//     res.push(strOps[i]); //todo, make res and strOps immutable by cloning the array here??
+//   }
+//   return res;
+//   //todo, there might be two match operations here that are not inline..
+// }
+//
 function headMatch(a, b) {
   const length = Math.min(a.length, b.length);
   for (let j = 0; j < length; j++) {
@@ -52,7 +76,7 @@ function cleanMoveOperationsToTheEnd(strOps) {
           firstStr = firstStr.substr(overlapStr.length) + overlapStr;
           secondIndex += overlapStr.length;
           secondStr = secondStr.substr(overlapStr.length);
-          res.push(['M', firstIndex-overlapStr.length, overlapStr]);
+          res.push(['M', firstIndex - overlapStr.length, overlapStr]);
           res.push([firstOp, firstIndex, firstStr]);
           res.push([secondOp, secondIndex, secondStr]);
           i++;
@@ -67,8 +91,7 @@ function cleanMoveOperationsToTheEnd(strOps) {
 
 export function unify(levenshteinOps) {
   const strOps = stringOps(levenshteinOps);
-  const clean1 = cleanMatchInTheMiddle(strOps);
-  //todo both cleaning operations might leave two insert, two matches, two delete, two substitute operations side by side. These operations should be merged.
+  const clean1 = cleanMatchInTheMiddle2(strOps);
   const clean2 = cleanMoveOperationsToTheEnd(clean1);
   //todo both cleaning operations might create two operations side by side. These operations should be merged.
   return clean2.filter(([op, index, str]) => op !== 'M');
