@@ -6,29 +6,23 @@ function stringOps(charOps) {
   return res;
 }
 
-function cleanMatchInTheMiddle2(strOps) {
-  if (strOps.length < 3)
-    return strOps;
+function cleanMatchInTheMiddle3(ops) {
   const res = [];
-  for (let i = 2; i < strOps.length; i++) {
-    const [beforeOp, beforeIndex, beforeStr] = strOps[i - 2];
-    const [middleOp, middleIndex, middleStr] = strOps[i - 1];
-    const [afterOp, afterIndex, afterStr] = strOps[i];
-    if (beforeOp === 'I' && middleOp === 'M' && afterOp === 'I' && afterStr.endsWith(middleStr)) {
+  for (let i = 0; i < ops.length; i++) {
+    const [oneOp, oneIndex, oneStr] = ops[i];
+    const [twoOp, twoIndex, twoStr] = ops[i + 1] || [];
+    const [threeOp, threeIndex, threeStr] = ops[i + 2] || [];
+    if (oneOp === 'I' && twoOp === 'M' && threeOp === 'I' && threeStr.endsWith(twoStr)) {
+      res.push([oneOp, oneIndex, oneStr + twoStr + threeStr.substr(0, threeStr.length - twoStr.length)]);
+      res.push([twoOp, twoIndex + threeStr.length, twoStr]);
       i += 2;
-      res.push([beforeOp, beforeIndex, beforeStr + middleStr + afterStr.substr(0, afterStr.length - middleStr.length)]);
-      res.push([middleOp, middleIndex + afterStr.length, middleStr]);
-      //todo, there is either nothing, or a match after this middleOp match. if there are two matches, they should be joined...
     } else {
-      res.push(strOps[i - 2]);
-      if (i === strOps.length - 1) {
-        res.push(strOps[i - 1]);
-        res.push(strOps[i]);
-      }
+      res.push(ops[i]);
     }
   }
   return res;
 }
+
 //
 // function cleanMatchInTheMiddle(strOps) {
 //   const res = [];
@@ -91,7 +85,7 @@ function cleanMoveOperationsToTheEnd(strOps) {
 
 export function unify(levenshteinOps) {
   const strOps = stringOps(levenshteinOps);
-  const clean1 = cleanMatchInTheMiddle2(strOps);
+  const clean1 = cleanMatchInTheMiddle3(strOps);
   const clean2 = cleanMoveOperationsToTheEnd(clean1);
   //todo both cleaning operations might create two operations side by side. These operations should be merged.
   return clean2.filter(([op, index, str]) => op !== 'M');
