@@ -17,7 +17,35 @@
     ["abcabcdef", "abcdef", [['I', 3, "abc"]]],
     ["abcdef", "abcabcdef", [['D', 3, "abc"]]],
     ["ab", "abab", [['D', 1, "ba"]]],
-    ["3a3a", "a", [['I', 0, "3a3"]]]
+    ["3a3a", "a", [['I', 0, "3a3"]]],
+    ["favorite", "fervourite", [["D",1,"e"],["S",1,"a"],["D",4,"u"]]],
+                 //frvourite //favourite //favorite
+
+    // ["English is my favorite subject at school.", "Inglesh iz my fervourite sabject at skool.",
+    //   [
+    //     ["S", 0, "E"],
+    //     ["S", 4, "i"],
+    //     ["S", 9, "s"],
+    //     ["S", 15, "a"],
+    //     ["D", 15, "r"],
+    //     ["D", 18, "u"],
+    //     ["S", 24, "u"],
+    //     ["S", 35, "c"],
+    //     ["I", 36, "h"],
+    //   ]]
+    //
+    //
+// ["S", 0, "E"],
+// ["S", 4, "i"],
+// ["S", 9, "s"],
+// ["D", 15, "e"], // delete e
+// ["S", 15, "a"], // insert a instead of r
+// ["D", 18, "u"],
+// ["S", 24, "u"],
+// ["I", 35, "c"],
+// ["S", 36, "h"],
+
+
 
     // abcd---efghijk---opq---rstuv---wxyz
     // bcd---eefh1j---ooq---rrsu2---wxy
@@ -42,6 +70,7 @@
     console.log(performance.now() - start);
     if (strMatches && arrayMatches)
       continue;
+    console.log(JSON.stringify(opsString));
     console.log(end, begin, reA, strMatches, arrayMatches);
     console.table(opsString);
   }
