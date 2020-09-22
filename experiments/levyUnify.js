@@ -16,9 +16,23 @@ function cleanMatchInTheMiddle3(ops) {
       res.push([oneOp, oneIndex, oneStr + twoStr + threeStr.substr(0, threeStr.length - twoStr.length)]);
       res.push([twoOp, twoIndex + threeStr.length, twoStr]);
       i += 2;
-    } else {
-      res.push(ops[i]);
+      continue;
     }
+    // if (oneOp === 'I' && (twoOp === 'M' || twoOp === 'D')) {
+    //   const overlapStr = headMatch(oneStr, twoStr);
+    //   if (overlapStr !== "") {
+    //     oneIndex += overlapStr.length;
+    //     oneStr = oneStr.substr(overlapStr.length) + overlapStr;
+    //     twoIndex += overlapStr.length;
+    //     twoStr = twoStr.substr(overlapStr.length);
+    //     res.push(['M', oneIndex - overlapStr.length, overlapStr]);
+    //     res.push([oneOp, oneIndex, oneStr]);
+    //     res.push([twoOp, twoIndex, twoStr]);
+    //     i++;
+    //     continue;
+    //   }
+    // }
+    res.push(ops[i]);
   }
   return res;
 }
@@ -59,23 +73,21 @@ function headMatch(a, b) {
 function cleanMoveOperationsToTheEnd(strOps) {
   const res = [];
   for (let i = 0; i < strOps.length; i++) {
-    let [firstOp, firstIndex, firstStr] = strOps[i];
-    if ((firstOp === 'I' || firstOp === 'D') && i < strOps.length - 1) {
-      let [secondOp, secondIndex, secondStr] = strOps[i + 1];
-      if (secondOp === 'M') {
-        //if the head of the insert matches the head of the match, this is called overlap
-        const overlapStr = headMatch(firstStr, secondStr);
-        if (overlapStr !== "") {
-          firstIndex += overlapStr.length;
-          firstStr = firstStr.substr(overlapStr.length) + overlapStr;
-          secondIndex += overlapStr.length;
-          secondStr = secondStr.substr(overlapStr.length);
-          res.push(['M', firstIndex - overlapStr.length, overlapStr]);
-          res.push([firstOp, firstIndex, firstStr]);
-          res.push([secondOp, secondIndex, secondStr]);
-          i++;
-          continue;
-        }
+    let [firstOp, oneIndex, oneStr] = strOps[i];
+    let [secondOp, twoIndex, twoStr] = strOps[i + 1] || [];
+    if ((firstOp === 'I' || firstOp === 'D') && secondOp === 'M') {
+      //if the head of the insert matches the head of the match, this is called overlap
+      const overlapStr = headMatch(oneStr, twoStr);
+      if (overlapStr !== "") {
+        const firstIndex = oneIndex + overlapStr.length;
+        const firstStr = oneStr.substr(overlapStr.length) + overlapStr;
+        const secondIndex = twoIndex + overlapStr.length;
+        const secondStr = twoStr.substr(overlapStr.length);
+        res.push(['M', firstIndex - overlapStr.length, overlapStr]);
+        res.push([firstOp, firstIndex, firstStr]);
+        res.push([secondOp, secondIndex, secondStr]);
+        i++;
+        continue;
       }
     }
     res.push(strOps[i]); //todo, make res and strOps immutable by cloning the array here??
