@@ -10,17 +10,17 @@
   import {unify, convert} from "./levyUnify.js";
 
   const tests2 = [
-    ["aaazced", "abcdef", [["R",1,"aaz",1], ['D', 5, "d"], ['S', 6, "d"]]],
-    ["abcdef", "aaazced", [["R",1,"b",3], ['I', 3, "d"], ['S', 5, "f"]]],
+    ["aaazced", "abcdef", [["R", 1, "aaz", 1], ['D', 5, "d"], ['S', 6, "d"]]],
+    ["abcdef", "aaazced", [["R", 1, "b", 3], ['I', 3, "d"], ['S', 5, "f"]]],
     ["asab", "saab", [['I', 0, "a"], ['D', 3, "a"]]],
     ["saab", "asab", [['D', 0, "a"], ['I', 2, "a"]]],
     ["abcabcdef", "abcdef", [['I', 3, "abc"]]],
     ["abcdef", "abcabcdef", [['D', 3, "abc"]]],
-    ["ab", "abab", [['D', 1, "ba"]]],
+    ["ab", "abab", [["D", 2, "ab"]]],
     ["3a3a", "a", [['I', 0, "3a3"]]],
-    ["favorite", "fervourite", [["R",1,"a",2],["D",4,"u"]]],
-    ["fervourite", "favorite", [["R",1,"er",1], ["I", 5, "u"]]],
-                 //frvourite //favourite //favorite
+    ["favorite", "fervourite", [["R", 1, "a", 2], ["D", 4, "u"]]],
+    ["fervourite", "favorite", [["R", 1, "er", 1], ["I", 5, "u"]]],
+    //frvourite //favourite //favorite
 
     // ["English is my favorite subject at school.", "Inglesh iz my fervourite sabject at skool.",
     //   [
@@ -45,7 +45,6 @@
 // ["S", 24, "u"],
 // ["I", 35, "c"],
 // ["S", 36, "h"],
-
 
 
     // abcd---efghijk---opq---rstuv---wxyz
