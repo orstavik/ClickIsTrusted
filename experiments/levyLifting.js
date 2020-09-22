@@ -15,29 +15,27 @@ function levTable(a, b) {
 }
 
 //Delete, Insert, Substitute, Match
-function lowestTopLeftAction(res, i, j) {
+//return ['D', index, chars, index2]
+function nextLevenshteinOp(res, i, j, strX, strY) {
   if (j === 0)
-    return ['D', i - 1, j];
+    return ['D', j, strY[i - 1], i - 1];
   if (i === 0)
-    return ['I', i, j - 1];
+    return ['I', j - 1, strX[j - 1], i];
   const now = res[i][j];
   const left = res[i - 1][j];
   const topLeft = res[i - 1][j - 1];
   const top = res[i][j - 1];
   if (topLeft <= top && topLeft <= left)
-    return [now === topLeft ? 'M' : 'S', i - 1, j - 1];
+    return [now === topLeft ? 'M' : 'S', j - 1, strX[j - 1], i - 1];
   if (top <= left)
-    return ['I', i, j - 1];
-  return ['D', i - 1, j];
+    return ['I', j - 1, strX[j - 1], i];
+  return ['D', j, strY[i - 1], i - 1];
 }
 
-//todo make charOps iterate, not recursive
 function charOps(table, i, j, strX, strY) {
-  if (i === 0 && j === 0)
-    return [];
-  const [op, nextI, nextJ] = lowestTopLeftAction(table, i, j);
-  const res = charOps(table, nextI, nextJ, strX, strY);
-  res.push([op, nextJ, op === 'D' ? strY[nextI] : strX[nextJ]]);
+  const res = [];
+  for (let op; i || j; j = op[1], i = op[3])
+    res.unshift(op = nextLevenshteinOp(table, i, j, strX, strY));
   return res;
 }
 

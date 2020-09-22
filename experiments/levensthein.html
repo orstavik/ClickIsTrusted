@@ -36,13 +36,14 @@
     const opsString = unify(ops);
     const reA = convert(begin, opsString);
     const strMatches = end === reA;
+    opsString.forEach(ar => ar.length === 4 && ar.pop());
     const arrayMatches = JSON.stringify(opsString) === JSON.stringify(expectedResult);
     //check for matching operation arrays
+    console.log(performance.now() - start);
     if (strMatches && arrayMatches)
       continue;
     console.log(end, begin, reA, strMatches, arrayMatches);
     console.table(opsString);
-    console.log(performance.now() - start);
   }
   //todo test with bigger texts and test performance. How big are the strings when things get heavy??
 </script>
