@@ -32,34 +32,45 @@ function levTable(a, b) {
 }
 
 //Delete, Insert, Substitute, Match
+function update(cmd, j, strY, i, prevOp) {
+  if(prevOp && prevOp[0] === cmd){
+    prevOp[1] = j;
+    prevOp[2] = strY + prevOp[2];
+    prevOp[3] = i;
+    return prevOp;
+  }
+  return [cmd, j, strY, i];
+}
+
 //return ['D', index, chars, index2]
-function nextLevenshteinOp(res, i, j, strX, strY) {
+function nextLevenshteinOp(res, i, j, strX, strY, prevOp) {
   if (j === 0)
-    return ['D', j, strY[i - 1], i - 1];
+    return update('D', j, strY[i - 1], i - 1, prevOp);
   if (i === 0)
-    return ['I', j - 1, strX[j - 1], i];
+    return update('I', j - 1, strX[j - 1], i, prevOp);
   const now = res[i][j];
   const left = res[i - 1][j];
   const topLeft = res[i - 1][j - 1];
   const top = res[i][j - 1];
   if (topLeft <= top && topLeft <= left)
-    return [now === topLeft ? 'M' : 'S', j - 1, strX[j - 1], i - 1];
+    return update(now === topLeft ? 'M' : 'S', j - 1, strX[j - 1], i - 1, prevOp);
   if (top <= left)
-    return ['I', j - 1, strX[j - 1], i];
-  return ['D', j, strY[i - 1], i - 1];
+    return update('I', j - 1, strX[j - 1], i, prevOp);
+  return update('D', j, strY[i - 1], i - 1, prevOp);
 }
 
 function charOps(table, i, j, strX, strY) {
   const res = [];
   for (let op; i || j; j = op[1], i = op[3]) {
-    let nextOp = nextLevenshteinOp(table, i, j, strX, strY);
-    op = nextOp;
-    let prevOp = res[0];
-    if (prevOp && prevOp[0] === op[0]) {
-      res[0][1] = op[1];
-      res[0][2] = op[2] + prevOp[2];
-    } else
+    op = nextLevenshteinOp(table, i, j, strX, strY, res[0]);
+    if(op !== res[0])
       res.unshift(op);
+    // op = nextOp;
+    // let prevOp = res[0];
+    // if (prevOp && prevOp[0] === op[0]) {
+    //   prevOp[1] = op[1];
+    //   prevOp[2] = op[2] + prevOp[2];
+    // } else
   }
   return res;
 }
