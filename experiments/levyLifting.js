@@ -44,23 +44,22 @@ function update(cmd, j, strY, i, prevOp) {
 
 //return 'D' or 'I' or 'S' or 'M'
 function nextLevenshteinOp(res, i, j) {
-  if (j === 0)
-    return 'D';
-  if (i === 0)
-    return 'I';
-  const now = res[i][j];
+  if (j === 0) return 'D';
+  if (i === 0) return 'I';
   const left = res[i - 1][j];
   const topLeft = res[i - 1][j - 1];
   const top = res[i][j - 1];
-  if (topLeft <= top && topLeft <= left)
-    return now === topLeft ? 'M' : 'S';
-  // if(now === topLeft)
-  //   console.log("whaaat?")
-  if (top <= left)
+  if (left < top && left < topLeft)
+    return 'D';
+  if (top < topLeft)
     return 'I';
-  return 'D';
+  const now = res[i][j];
+  if (now === topLeft)
+    return 'M';
+  return 'S';
 }
 
+//returns a list of string edit ops
 function editOps(table, i, j, strX, strY) {
   const res = [];
   while (i || j) {
@@ -72,7 +71,7 @@ function editOps(table, i, j, strX, strY) {
       res[0][1] = j;
       res[0][2] = char + res[0][2];
     } else {
-      res.unshift([cmd,j, char]);
+      res.unshift([cmd, j, char]);
     }
   }
   return res;
