@@ -56,8 +56,8 @@ function charOps(table, i, j, strX, strY) {
     op = nextOp;
     let prevOp = res[0];
     if (prevOp && prevOp[0] === op[0]) {
-      res[0] = op;
-      op[2] += prevOp[2];
+      res[0][1] = op[1];
+      res[0][2] = op[2] + prevOp[2];
     } else
       res.unshift(op);
   }
