@@ -1,11 +1,3 @@
-function stringOps(charOps) {
-  const res = [];
-  let prevOp = [];
-  for (let op of charOps)
-    prevOp[0] === op[0] ? prevOp[2] += op[2] : res.push(prevOp = op);
-  return res;
-}
-
 function headMatch(a, b) {
   if(a === b)
     return a;
@@ -58,8 +50,7 @@ function cleanLevenshtein(ops) {
 }
 
 export function unify(levenshteinOps) {
-  const strOps = stringOps(levenshteinOps);
-  const clean = cleanLevenshtein(strOps);
+  const clean = cleanLevenshtein(levenshteinOps);
   return clean.filter(([op]) => op !== 'M');
 }
 

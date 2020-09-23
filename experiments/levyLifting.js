@@ -1,12 +1,29 @@
-function levTable(a, b) {
-  const res = new Array(b.length + 1);
+function makeTable(y, x) {
+  const res = Array.from({length: y}, () => Array(x));
   //1. make default rows
-  for (let i = 0; i < b.length + 1; i++) res[i] = [i];
-  for (let i = 1; i < a.length + 1; i++) res[0][i] = i;
+  for (let i = 0; i < y; i++) res[i] = [i];
+  for (let i = 1; i < x; i++) res[0][i] = i;
+  return res;
+}
+
+let maxY = 2000;
+let maxX = 2000;
+let cachedTable = makeTable(maxY, maxX);
+
+function getTable(y, x) {
+  if (x <= maxX && y <= maxY)
+    return cachedTable;
+  return cachedTable = makeTable(Math.max(y, maxY), Math.max(x, maxX));
+}
+
+function levTable(a, b) {
+  const y = b.length + 1;
+  const x = a.length + 1;
+  const res = getTable(y, x);
 
   //2. filling the body.
-  for (let i = 1; i < b.length + 1; i++) {
-    for (let j = 1; j < a.length + 1; j++) {
+  for (let i = 1; i < y; i++) {
+    for (let j = 1; j < x; j++) {
       //smallest of top,left,topLeft + 1 if different/0 if the same
       res[i][j] = Math.min(res[i - 1][j], res[i][j - 1], res[i - 1][j - 1]) + (a[j - 1] !== b[i - 1] | 0);
     }
@@ -34,10 +51,26 @@ function nextLevenshteinOp(res, i, j, strX, strY) {
 
 function charOps(table, i, j, strX, strY) {
   const res = [];
-  for (let op; i || j; j = op[1], i = op[3])
-    res.unshift(op = nextLevenshteinOp(table, i, j, strX, strY));
+  for (let op; i || j; j = op[1], i = op[3]) {
+    let nextOp = nextLevenshteinOp(table, i, j, strX, strY);
+    op = nextOp;
+    let prevOp = res[0];
+    if (prevOp && prevOp[0] === op[0]) {
+      res[0] = op;
+      op[2] += prevOp[2];
+    } else
+      res.unshift(op);
+  }
   return res;
 }
+//
+// function stringOps(charOps) {
+//   const res = [];
+//   let prevOp = [];
+//   for (let op of charOps)
+//     prevOp[0] === op[0] ? prevOp[2] += op[2] : res.push(prevOp = op);
+//   return res;
+// }
 
 export function levenshtein(a, b) {
   return charOps(levTable(a, b), b.length, a.length, a, b);
