@@ -9,14 +9,16 @@ hello sunshine
 <script type="module">
   import {myersDiff, convert} from "./myerLifting.js";
 
-  const ref = 'ABCABBA';
-  const tar = 'CBABAC';
-  const ops = myersDiff(tar, ref);
-  console.log(ops);
-  const res = convert(ref, ops);
-  console.log(res, res === tar);
-  const resInvert = convert(tar, ops, true);
-  console.log(resInvert, resInvert === ref);
+  function test(tar1, ref1) {
+    const ops = myersDiff(tar1, ref1);
+    console.log(ops);
+    const res = convert(ref1, ops);
+    console.log(res, res === tar1);
+    const resInvert = convert(tar1, ops, true);
+    console.log(resInvert, resInvert === ref1);
+  }
+
+  test('CBABAC', 'ABCABBA');
 </script>
 </body>
 </html>

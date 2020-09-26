@@ -1,14 +1,14 @@
 export function convert(ref, ops, targetToRef) {
   const filtered = ops.filter(op => op[2] !== (targetToRef ? '+' : '-'));
-  console.log(filtered.length)
-  for (let op of filtered) {
-    console.log("...")
-    console.log(op[2])
-    console.log(op[3]);
-    console.log("x", op[2] === " " ? ref[op[0]-1] : '-'); //the match is the tar[y] and ref[x] value, so we don't need to save that in the line
-    console.log("y", op[2] === " " ? ref[op[1]-1] : '-');
-  }
-  console.log("----")
+  // console.log(filtered.length)
+  // for (let op of filtered) {
+  //   console.log("...")
+  //   console.log(op[2])
+  //   console.log(op[3]);
+  //   console.log("x", op[2] === " " ? ref[op[0] - 1] : '-'); //the match is the tar[y] and ref[x] value, so we don't need to save that in the line
+  //   console.log("y", op[2] === " " ? ref[op[1] - 1] : '-');
+  // }
+  // console.log("----")
   return filtered.map(op => op[3]).join('');
 }
 
@@ -23,16 +23,13 @@ function makeBranch(x, y, ref, tar, op) {
   while (ref[x + n] === tar[y + n] && x + n < ref.length && y + n < tar.length)
     n++;
   const end = (x + n) + ',' + (y + n);
-  if (pointsVisited.indexOf(end) !== -1)
+  if (pointsVisited.indexOf(end) !== -1) //set up a single 2d array to keep both the points and the points visited as one.
     return null;
   pointsVisited.push(end);
   const res = [[x, y, op, op === '-' ? ref[x - 1] : tar[y - 1]]];
-  // if ( n>0)
-  //   res.unshift([x + n + 1, y + n + 1, ' ', ref.substr(x, n)]);
-  // if(n === 2)
-  //   debugger
-  for (let i = 0; i < n; i++)
-    res.unshift([x + i + 1, y + i + 1, ' ', ref[x + i]]);
+  if (n > 0)
+    res.unshift([x + n, y + n, ' ', ref.substr(x, n)]);
+  //todo, add the match operation with the insert delete, and instead game out the diagonal match in post production.
   return res;
 }
 
@@ -43,7 +40,7 @@ export function myersDiff(tar, ref) {
   let n = 0;
   while (ref[n] === tar[n])
     n++;
-  let branches = [[[n, n, ' ', ref.substr(0, n)]]];
+  let branches = [[[n, n, ' ', ref.substr(0, n), ' ']]];
 
   let done = false;
   while (true) {
@@ -72,11 +69,29 @@ export function myersDiff(tar, ref) {
     if (done) {
       let res = nextBranches.filter(branch => branch[0][0] === ref.length && branch[0][1] === tar.length);
       res = res[0];
-      res.pop();
       res.reverse();
-      //todo mergeDeleteAndInsert(res); //todo cleanup, merge delete and insert into substitute
+      addingOperatorStringsPostProduction(res, ref, tar);
       return res;
     }
     branches = nextBranches;
   }
+}
+
+function addingOperatorStringsPostProduction(res, ref, tar) {
+  for (let i = 1; i < res.length; i++) {
+    let one = res[i - 1];
+    let two = res[i];
+    if ((one[0] - two[0]) === (one[1] - two[1])) {
+      two.push(" ");
+      two.push(ref.substr(one[0], two[0] - one[0]));
+      // two.push(tar.substr(one[1], two[0] - one[0])); //you can find this from both the tar and the ref, using either the y or the x value.
+    } else if (one[0] + 1 === two[0]) {
+      two.push("-");
+      two.push(ref[one[0]]);
+    } else if (one[1] + 1 === two[1]) {
+      two.push("+");
+      two.push(tar[one[1]]);
+    }
+  }
+  debugger
 }
