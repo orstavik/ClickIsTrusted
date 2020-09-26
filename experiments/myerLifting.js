@@ -59,45 +59,24 @@ export function myersDiff(tar, ref) {
   }
 }
 
-function splitMatchingTail(input) {
-  const res = [input[0]];
-  for (let i = 1; i < input.length; i++) {
-    let one = input[i - 1];
-    let two = input[i];
-    const distX = two[0]-one[0];
-    const distY = two[1]-one[1];
-    const min = Math.min(distX, distY);
-    const editX = two[0]-min;
-    const editY = two[1]-min;
-    res.push([editX, editY]);
-    if(min)
-      res.push(two);
-  }
-  return res;
-}
-
 function postProcess(res, ref, tar) {
-  res.reverse();
-  res = splitMatchingTail(res);
-  addingOperatorStringsPostProduction(res, ref, tar);
-  res.unshift();
-  return res;
-}
-
-function addingOperatorStringsPostProduction(res, ref, tar) {
-  for (let i = 1; i < res.length; i++) {
-    let one = res[i - 1];
+  const output = [];
+  let oneX = 0;
+  let oneY = 0;
+  for (let i = res.length - 2; i >= 0; i--) {
     let two = res[i];
-    if ((one[0] - two[0]) === (one[1] - two[1])) {
-      two.push(" ");
-      two.push(ref.substr(one[0], two[0] - one[0]));//todo we don't need to add the string, we only need to add the length of the match.
-      // two.push(tar.substr(one[1], two[0] - one[0])); //you can find this from both the tar and the ref, using either the y or the x value.
-    } else if (one[0] + 1 === two[0]) {
-      two.push("-");
-      two.push(ref[one[0]]);
-    } else if (one[1] + 1 === two[1]) {
-      two.push("+");
-      two.push(tar[one[1]]);
-    }
+    const nextX = two[0];
+    const nextY = two[1];
+    const distX = nextX - oneX;
+    const distY = nextY - oneY;
+    const min = Math.min(distX, distY);
+    const editX = nextX - min;
+    const editY = nextY - min;
+    output.push([editX, editY, distX > distY ? '-' : '+', distX > distY ? ref[oneX] : tar[oneY]]);
+    if (min)
+      output.push([nextX, nextY, ' ', ref.substr(editX, min)]);
+    oneX = nextX;
+    oneY = nextY;
   }
+  return output;
 }
