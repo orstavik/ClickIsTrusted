@@ -1,15 +1,5 @@
 export function convert(ref, ops, targetToRef) {
-  const filtered = ops.filter(op => op[2] !== (targetToRef ? '+' : '-'));
-  // console.log(filtered.length)
-  // for (let op of filtered) {
-  //   console.log("...")
-  //   console.log(op[2])
-  //   console.log(op[3]);
-  //   console.log("x", op[2] === " " ? ref[op[0] - 1] : '-'); //the match is the tar[y] and ref[x] value, so we don't need to save that in the line
-  //   console.log("y", op[2] === " " ? ref[op[1] - 1] : '-');
-  // }
-  // console.log("----")
-  return filtered.map(op => op[3]).join('');
+  return ops.filter(op => op[2] !== (targetToRef ? '+' : '-')).map(op => op[3]).join('');
 }
 
 function isDone(x, y, X, Y) {
@@ -26,11 +16,7 @@ function makeBranch(x, y, ref, tar) {
   if (pointsVisited.indexOf(end) !== -1) //set up a single 2d array to keep both the points and the points visited as one.
     return null;
   pointsVisited.push(end);
-  const res = [[x, y]];
-  if (n > 0)
-    res.unshift([x + n, y + n]);
-  //todo, add the match operation with the insert delete, and instead game out the diagonal match in post production.
-  return res;
+  return [[x + n, y + n]];
 }
 
 export function myersDiff(tar, ref) {
@@ -54,7 +40,7 @@ export function myersDiff(tar, ref) {
       if (x < ref.length) {
         let res = makeBranch(x + 1, y, ref, tar);
         if (res) {
-          if(isDone(res[0][0], res[0][1], ref, tar))
+          if (isDone(res[0][0], res[0][1], ref, tar))
             return postProcess(res.concat(branch), ref, tar);
           nextBranches.push(res.concat(branch));
         }
@@ -63,7 +49,7 @@ export function myersDiff(tar, ref) {
       if (y < tar.length) {
         let res = makeBranch(x, y + 1, ref, tar);
         if (res) {
-          if(isDone(res[0][0], res[0][1], ref, tar))
+          if (isDone(res[0][0], res[0][1], ref, tar))
             return postProcess(res.concat(branch), ref, tar);
           nextBranches.push(res.concat(branch));
         }
@@ -73,8 +59,26 @@ export function myersDiff(tar, ref) {
   }
 }
 
+function splitMatchingTail(input) {
+  const res = [input[0]];
+  for (let i = 1; i < input.length; i++) {
+    let one = input[i - 1];
+    let two = input[i];
+    const distX = two[0]-one[0];
+    const distY = two[1]-one[1];
+    const min = Math.min(distX, distY);
+    const editX = two[0]-min;
+    const editY = two[1]-min;
+    res.push([editX, editY]);
+    if(min)
+      res.push(two);
+  }
+  return res;
+}
+
 function postProcess(res, ref, tar) {
   res.reverse();
+  res = splitMatchingTail(res);
   addingOperatorStringsPostProduction(res, ref, tar);
   res.unshift();
   return res;
