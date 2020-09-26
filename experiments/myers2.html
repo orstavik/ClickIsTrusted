@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+hello sunshine
+<script type="module">
+  import {myersDiff, convert} from "./myerLifting.js";
+
+  const ref = 'ABCABBA';
+  const tar = 'CBABAC';
+  const ops = myersDiff(tar, ref);
+  console.log(ops);
+  const res = convert(ref, ops);
+  console.log(res, res === tar);
+  const resInvert = convert(tar, ops, true);
+  console.log(resInvert, resInvert === ref);
+</script>
+</body>
+</html>
