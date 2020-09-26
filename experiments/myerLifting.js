@@ -2,10 +2,6 @@ export function convert(ref, ops, targetToRef) {
   return ops.filter(op => op[2] !== (targetToRef ? '+' : '-')).map(op => op[3]).join('');
 }
 
-function isDone(x, y, X, Y) {
-  return x === X.length && y === Y.length;
-}
-
 let pointsVisited = [];
 
 function makeBranch(x, y, ref, tar) {
@@ -21,17 +17,14 @@ function makeBranch(x, y, ref, tar) {
 
 export function myersDiff(tar, ref) {
 
-  //todo make a wrapper function that removes identical head and tail.
   if (ref === tar)
     return [];
   let n = 0;
   while (ref[n] === tar[n])
     n++;
-  // if(n > 0)
+
   let branches = [[[n, n]]];
-
   while (true) {
-
     let nextBranches = [];
     for (let i = 0; i < branches.length; i++) {
       let branch = branches[i];
@@ -40,7 +33,7 @@ export function myersDiff(tar, ref) {
       if (x < ref.length) {
         let res = makeBranch(x + 1, y, ref, tar);
         if (res) {
-          if (isDone(res[0][0], res[0][1], ref, tar))
+          if (res[0][0] === ref.length && res[0][1] === tar.length)
             return postProcess(res.concat(branch), ref, tar);
           nextBranches.push(res.concat(branch));
         }
@@ -49,7 +42,7 @@ export function myersDiff(tar, ref) {
       if (y < tar.length) {
         let res = makeBranch(x, y + 1, ref, tar);
         if (res) {
-          if (isDone(res[0][0], res[0][1], ref, tar))
+          if (res[0][0] === ref.length && res[0][1] === tar.length)
             return postProcess(res.concat(branch), ref, tar);
           nextBranches.push(res.concat(branch));
         }
