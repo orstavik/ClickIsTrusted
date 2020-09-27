@@ -33,7 +33,7 @@ export function myersDiff(tar, ref) {
 
   const theVeryEnd = toCoordinate(ref.length, tar.length);
 
-  let branches = [[n + ',' + n]];
+  let branches = [[toCoordinate(n, n)]];
   while (true) {
     let nextBranches = [];
     for (let i = 0; i < branches.length; i++) {
