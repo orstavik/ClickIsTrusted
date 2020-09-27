@@ -4,23 +4,25 @@ export function convert(ref, ops, targetToRef) {
 
 let pointsVisited = [];
 
-function makeBranch(x, y, ref, tar) {
+function makeBranch(x, y, ref, tar, xSkew) {
   let n = 0;
   while (ref[x + n] === tar[y + n] && x + n < ref.length && y + n < tar.length)
     n++;
-  const end = toCoordinate(x + n, y + n);
+  const end = toCoordinate(x + n, y + n, xSkew);
   if (pointsVisited.indexOf(end) !== -1) //set up a single 2d array to keep both the points and the points visited as one.
     return null;
   pointsVisited.push(end);
   return [end];
 }
 
-function toCoordinate(x, y) {
-  return x + ',' + y;
+function toCoordinate(x, y, xSkew) {
+  return (x << xSkew) + y;
 }
 
-function fromCoordinate(p) {
-  return p.split(',').map(s => parseInt(s));
+function fromCoordinate(p, xSkew) {
+  const x = p >> xSkew;
+  const y = p - (x << xSkew);
+  return [x, y];
 }
 
 export function myersDiff(tar, ref) {
@@ -31,29 +33,30 @@ export function myersDiff(tar, ref) {
   while (ref[n] === tar[n])
     n++;
 
-  const theVeryEnd = toCoordinate(ref.length, tar.length);
+  const xSkew = tar.length.toString(2).length;
+  const theVeryEnd = toCoordinate(ref.length, tar.length, xSkew);
 
-  let branches = [[toCoordinate(n, n)]];
+  let branches = [[toCoordinate(n, n, xSkew)]];
   while (true) {
     let nextBranches = [];
     for (let i = 0; i < branches.length; i++) {
       let branch = branches[i];
-      let [x, y] = fromCoordinate(branch[0]);
+      let [x, y] = fromCoordinate(branch[0], xSkew);
       //go right/delete from a
       if (x < ref.length) {
-        let res = makeBranch(x + 1, y, ref, tar);
+        let res = makeBranch(x + 1, y, ref, tar, xSkew);
         if (res) {
           if (res[0] === theVeryEnd)
-            return postProcess(res.concat(branch), ref, tar);
+            return postProcess(res.concat(branch), ref, tar, xSkew);
           nextBranches.push(res.concat(branch));
         }
       }
       //go down/insert from b
       if (y < tar.length) {
-        let res = makeBranch(x, y + 1, ref, tar);
+        let res = makeBranch(x, y + 1, ref, tar, xSkew);
         if (res) {
           if (res[0] === theVeryEnd)
-            return postProcess(res.concat(branch), ref, tar);
+            return postProcess(res.concat(branch), ref, tar, xSkew);
           nextBranches.push(res.concat(branch));
         }
       }
@@ -62,12 +65,12 @@ export function myersDiff(tar, ref) {
   }
 }
 
-function postProcess(res, ref, tar) {
+function postProcess(coords, ref, tar, xSkew) {
   const output = [];
   let oneX = 0;
   let oneY = 0;
-  for (let i = res.length - 2; i >= 0; i--) {
-    const [nextX, nextY] = fromCoordinate(res[i]);
+  for (let i = coords.length - 2; i >= 0; i--) {
+    const [nextX, nextY] = fromCoordinate(coords[i], xSkew);
     const distX = nextX - oneX;
     const distY = nextY - oneY;
     const min = Math.min(distX, distY);
