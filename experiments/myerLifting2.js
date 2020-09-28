@@ -12,7 +12,6 @@ export function myersDiff(tar, ref) {
 
   let res = [{0: 0}, {}];
   for (let d = 1; d < 10000; d++) {
-    debugger;
     res[d + 1] = {};
     for (let k = Math.max(-d, -tar.length); k <= Math.min(d, ref.length); k += 2) {
       const previousUpIsBest = k === -d || k !== d && res[d - 1][k + 1] > res[d - 1][k - 1];  //true if we are coming down, false if we are coming up.
@@ -44,7 +43,6 @@ function convertDKsToListOfCoordinates(res, d, k, ref, tar) {
     else
       k++;
   }
-  coords.push([0, 0]);
   return postProcess(coords, ref, tar)
   // return coords;
 }
@@ -53,7 +51,7 @@ function postProcess(coords, ref, tar) {
   const output = [];
   let oneX = 0;
   let oneY = 0;
-  for (let i = coords.length - 2; i >= 0; i--) {
+  for (let i = coords.length - 1; i >= 0; i--) {
     const [nextX, nextY] = coords[i];
     const distX = nextX - oneX;
     const distY = nextY - oneY;
