@@ -27,13 +27,8 @@ export function myersDiff(tar, ref) {
       while (ref[nowX + n] === tar[nowY + n] && nowY + n < endX && nowY + n < endY)
         n++;
       res[d][k] = res[d + 1][k] = nowX + n;
-      // if(isNaN(res[d][k]))
-      //   debugger
-      if (nowX + n === endX && nowY + n === endY) {
-        // res[0][0] = 0;
-        // res[1][0] = 0;
+      if (nowX + n === endX && nowY + n === endY)
         return postProcess(mapToXY(res, d, k), ref, tar);
-      }
     }
   }
 }
