@@ -25,19 +25,17 @@ export function myersDiff(tar, ref) {
         n++;
       res[d][k] = nowX + n;
       res[d + 1][k] = nowX + n;
-      if (nowX + n === endX && nowY + n === endY) {
-        const coords = convertDKsToListOfCoordinates(res, d, k);
-        return postProcess(coords, ref, tar);
-      }
+      if (nowX + n === endX && nowY + n === endY)
+        return postProcess(mapToXY(res, d, k), ref, tar);
     }
   }
 }
 
-function convertDKsToListOfCoordinates(res, d, k) {
-  let coords = [];
-  for (let i = d; i; i--) {
+function mapToXY(res, d, k) {
+  const coords = Array(d);
+  for (let i = 1; i <=  d; i++) {
     const x = res[i][k];
-    coords[i - 1] = ([x, x - k]);
+    coords[i - 1] = [x, x - k];
     res[i][k - 1] > res[i][k + 1] || res[i][k + 1] === undefined ? k-- : k++;
   }
   return coords;
