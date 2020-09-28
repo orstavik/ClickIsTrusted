@@ -27,29 +27,32 @@ export function myersDiff(tar, ref) {
       while (ref[nowX + n] === tar[nowY + n] && nowY + n < endX && nowY + n < endY)
         n++;
       res[d][k] = res[d + 1][k] = nowX + n;
-      if(isNaN(res[d][k]))
-        debugger
-      if (nowX + n === endX && nowY + n === endY)
+      // if(isNaN(res[d][k]))
+      //   debugger
+      if (nowX + n === endX && nowY + n === endY) {
+        // res[0][0] = 0;
+        // res[1][0] = 0;
         return postProcess(mapToXY(res, d, k), ref, tar);
+      }
     }
   }
 }
 
 function mapToXY(res, d, k) {
-  const coords = Array(d);
+  const coords = Array(d + 1);
+  coords[0] = [res[0][0], res[0][0]];
   for (let i = 1; i <= d; i++) {
     const x = res[i][k];
-    coords[i - 1] = [x, x - k];
+    coords[i] = [x, x - k];
     res[i][k - 1] > res[i][k + 1] || res[i][k + 1] === undefined ? k-- : k++;
   }
   return coords;
 }
 
 function postProcess(coords, ref, tar) {
-  const output = [];
-  let oneX = 0;
-  let oneY = 0;
-  for (let i = 0; i < coords.length; i++) {
+  let [oneX, oneY] = coords[0];
+  const output = oneX ? [[oneX, oneY, ' ', ref.substr(0, oneX)]] : [];
+  for (let i = 1; i < coords.length; i++) {
     const [nextX, nextY] = coords[i];
     const distX = nextX - oneX;
     const distY = nextY - oneY;
