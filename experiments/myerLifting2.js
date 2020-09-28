@@ -36,7 +36,7 @@ function convertDKsToListOfCoordinates(res, d, k, ref, tar) {
   while (d) {
     const x = res[d][k];
     const y = x - k;
-    coords.push([x, y]);
+    coords.unshift([x, y]);
     d--;
     if (res[d][k - 1] > res[d][k + 1] || res[d][k + 1] === undefined) //what about undefined??
       k--;
@@ -51,7 +51,7 @@ function postProcess(coords, ref, tar) {
   const output = [];
   let oneX = 0;
   let oneY = 0;
-  for (let i = coords.length - 1; i >= 0; i--) {
+  for (let i = 0; i < coords.length; i++) {
     const [nextX, nextY] = coords[i];
     const distX = nextX - oneX;
     const distY = nextY - oneY;
