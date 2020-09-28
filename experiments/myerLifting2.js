@@ -4,7 +4,7 @@ export function convert(ref, ops, targetToRef) {
 
 export function myersDiff(tar, ref) {
   const endX = ref.length;
-  const endY = tar.length; //when we reach these values, we break
+  const endY = tar.length;
 
   let n = 0;
   while (tar[n] === ref[n])
@@ -35,11 +35,12 @@ export function myersDiff(tar, ref) {
 
 function mapToXY(res, d, k) {
   const coords = Array(d + 1);
-  coords[0] = [res[0][0], res[0][0]];
+  const first = res[0][0];
+  coords[0] = [first, first];
   for (let i = d; i > 0; i--) {
     const x = res[i][k];
     coords[i] = [x, x - k];
-    res[i-1][k - 1] > res[i-1][k + 1] || res[i-1][k + 1] === undefined ? k-- : k++;
+    res[i - 1][k - 1] > res[i - 1][k + 1] || res[i - 1][k + 1] === undefined ? k-- : k++;
   }
   return coords;
 }
@@ -54,7 +55,11 @@ function postProcess(coords, ref, tar) {
     const min = Math.min(distX, distY);
     const editX = nextX - min;
     const editY = nextY - min;
-    output.push([editX, editY, distX > distY ? '-' : '+', distX > distY ? ref[oneX] : tar[oneY]]);
+    const editOp = distX >= distY ?   //todo should it be distX > distY??
+      [editX, editY, '-', ref[oneX]] :
+      [editX, editY, '+', tar[oneY]];
+    output.push(editOp);
+    // output.push([editX, editY, distX > distY ? '-' : '+', distX > distY ? ref[oneX] : tar[oneY]]);
     if (min)
       output.push([nextX, nextY, ' ', ref.substr(editX, min)]);
     oneX = nextX;

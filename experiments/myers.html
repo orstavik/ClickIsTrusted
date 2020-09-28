@@ -11,12 +11,14 @@ hello sunshine
   import {tests2} from "./levenshteinTests.js";
 
   function test(tar1, ref1) {
+    const start = performance.now();
     const ops = myersDiff(tar1, ref1);
     console.log(ops);
     const res = convert(ref1, ops);
     console.log(res, res === tar1);
     const resInvert = convert(tar1, ops, true);
     console.log(resInvert, resInvert === ref1);
+    console.log(performance.now()-start);
   }
 
   //works
@@ -26,9 +28,8 @@ hello sunshine
   test('AB', 'CD');
   test('ABCDEF', 'MNOPQRS');
 
-  // for (let t of tests2) {
-  //   test(t[0], t[1]);
-  // }
+  for (let t of tests2)
+    test(t[0], t[1]);
 </script>
 </body>
 </html>
