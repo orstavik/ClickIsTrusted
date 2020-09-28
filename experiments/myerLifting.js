@@ -66,11 +66,15 @@ export function myersDiff(tar, ref) {
 }
 
 function postProcess(coords, ref, tar, xSkew) {
+  coords = coords.map(coord => fromCoordinate(coord, xSkew));
+  console.log(coords);
+  debugger
+
   const output = [];
   let oneX = 0;
   let oneY = 0;
   for (let i = coords.length - 2; i >= 0; i--) {
-    const [nextX, nextY] = fromCoordinate(coords[i], xSkew);
+    const [nextX, nextY] = coords[i];
     const distX = nextX - oneX;
     const distY = nextY - oneY;
     const min = Math.min(distX, distY);

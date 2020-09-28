@@ -7,7 +7,7 @@
 <body>
 hello sunshine
 <script type="module">
-  import {myersDiff, convert} from "./myerLifting.js";
+  import {myersDiff, convert} from "./myerLifting2.js";
 
   function test(tar1, ref1) {
     const ops = myersDiff(tar1, ref1);
@@ -18,7 +18,9 @@ hello sunshine
     console.log(resInvert, resInvert === ref1);
   }
 
+  // test('A', 'B');
   test('CBABAC', 'ABCABBA');
+  // test('ABCDEF', 'MNOPQRS'); infinite loop
 </script>
 </body>
 </html>
