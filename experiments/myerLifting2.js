@@ -15,8 +15,9 @@ export function myersDiff(tar, ref) {
     res[d + 1] = {};
     for (let k = -d; k <= d; k += 2) {
       //todo not sure about this capping..Not sure it is ever useful, and not sure that it is safe. If one of the texts is a lot shorter than the other, it might make sense though..
-      if (k < -tar.length || k > ref.length)
-        continue;
+      //bug, doesn't work
+      // if (k < -tar.length || k > ref.length)
+      //   continue;
       const previousUpIsBest = k === -d || k !== d && res[d - 1][k + 1] > res[d - 1][k - 1];  //true if we are coming down, false if we are coming up.
       const previousK = previousUpIsBest ? k + 1 : k - 1;
       const previousX = res[d - 1][previousK];
@@ -26,6 +27,8 @@ export function myersDiff(tar, ref) {
       while (ref[nowX + n] === tar[nowY + n] && nowY + n < endX && nowY + n < endY)
         n++;
       res[d][k] = res[d + 1][k] = nowX + n;
+      if(isNaN(res[d][k]))
+        debugger
       if (nowX + n === endX && nowY + n === endY)
         return postProcess(mapToXY(res, d, k), ref, tar);
     }

@@ -8,6 +8,7 @@
 hello sunshine
 <script type="module">
   import {myersDiff, convert} from "./myerLifting2.js";
+  import {tests2} from "./levenshteinTests.js";
 
   function test(tar1, ref1) {
     const ops = myersDiff(tar1, ref1);
@@ -18,9 +19,18 @@ hello sunshine
     console.log(resInvert, resInvert === ref1);
   }
 
-  // test('A', 'B');
+  //works
   test('CBABAC', 'ABCABBA');
-  // test('ABCDEF', 'MNOPQRS'); infinite loop
+  test('A', 'B');
+
+//bug
+  test('AB', 'CD');
+  test('ABCDEF', 'MNOPQRS');
+  test('A', 'AB');
+
+  // for (let t of tests2) {
+  //   test(t[0], t[1]);
+  // }
 </script>
 </body>
 </html>
