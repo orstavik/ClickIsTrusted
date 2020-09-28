@@ -10,15 +10,14 @@ export function myersDiff(tar, ref) {
   while (tar[n] === ref[n])
     n++;
 
-  let res = [{0: 0}, {}];
+  let res = [{0: n}, {}];
   for (let d = 1; d < 10000; d++) {
     res[d + 1] = {};
     for (let k = Math.max(-d, -tar.length); k <= Math.min(d, ref.length); k += 2) {
       const previousUpIsBest = k === -d || k !== d && res[d - 1][k + 1] > res[d - 1][k - 1];  //true if we are coming down, false if we are coming up.
       const previousK = previousUpIsBest ? k + 1 : k - 1;
       const previousX = res[d - 1][previousK];
-      // const previousY = previousX - previousK;
-      const nowX = previousX + (!previousUpIsBest ? 1 : 0);
+      const nowX = previousX + (previousUpIsBest ? 0 : 1);
       const nowY = nowX - k;
       let n = 0;
       while (ref[nowX + n] === tar[nowY + n] && nowY + n < endX && nowY + n < endY)
