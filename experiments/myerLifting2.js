@@ -10,10 +10,13 @@ export function myersDiff(tar, ref) {
   while (tar[n] === ref[n])
     n++;
 
-  let res = [{0: n}, {}];
+  let res = [{0: n}, {0: n}];
   for (let d = 1; d < 10000; d++) {
     res[d + 1] = {};
-    for (let k = Math.max(-d, -tar.length); k <= Math.min(d, ref.length); k += 2) {
+    for (let k = -d; k <= d; k += 2) {
+      //todo not sure about this capping..Not sure it is ever useful, and not sure that it is safe. If one of the texts is a lot shorter than the other, it might make sense though..
+      if (k < -tar.length || k > ref.length)
+        continue;
       const previousUpIsBest = k === -d || k !== d && res[d - 1][k + 1] > res[d - 1][k - 1];  //true if we are coming down, false if we are coming up.
       const previousK = previousUpIsBest ? k + 1 : k - 1;
       const previousX = res[d - 1][previousK];
@@ -22,8 +25,7 @@ export function myersDiff(tar, ref) {
       let n = 0;
       while (ref[nowX + n] === tar[nowY + n] && nowY + n < endX && nowY + n < endY)
         n++;
-      res[d][k] = nowX + n;
-      res[d + 1][k] = nowX + n;
+      res[d][k] = res[d + 1][k] = nowX + n;
       if (nowX + n === endX && nowY + n === endY)
         return postProcess(mapToXY(res, d, k), ref, tar);
     }
@@ -32,7 +34,7 @@ export function myersDiff(tar, ref) {
 
 function mapToXY(res, d, k) {
   const coords = Array(d);
-  for (let i = 1; i <=  d; i++) {
+  for (let i = 1; i <= d; i++) {
     const x = res[i][k];
     coords[i - 1] = [x, x - k];
     res[i][k - 1] > res[i][k + 1] || res[i][k + 1] === undefined ? k-- : k++;
