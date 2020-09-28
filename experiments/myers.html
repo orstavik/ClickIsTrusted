@@ -18,10 +18,12 @@ hello sunshine
     console.log(res, res === tar1);
     const resInvert = convert(tar1, ops, true);
     console.log(resInvert, resInvert === ref1);
-    console.log(performance.now()-start);
+    console.log(performance.now() - start);
   }
 
   //works
+  test("zce", "cde");
+  test("aaazced", "abcdef");
   test('CBABAC', 'ABCABBA');
   test('A', 'B');
   test('aa', 'aaB');
