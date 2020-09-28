@@ -35,13 +35,10 @@ export function myersDiff(tar, ref) {
 
 function convertDKsToListOfCoordinates(res, d, k) {
   let coords = [];
-  for (;d; d--) {
-    const x = res[d][k];
-    coords.unshift([x, x - k]);
-    if (res[d][k - 1] > res[d][k + 1] || res[d][k + 1] === undefined) //what about undefined??
-      k--;
-    else
-      k++;
+  for (let i = d; i; i--) {
+    const x = res[i][k];
+    coords[i - 1] = ([x, x - k]);
+    res[i][k - 1] > res[i][k + 1] || res[i][k + 1] === undefined ? k-- : k++;
   }
   return coords;
 }
