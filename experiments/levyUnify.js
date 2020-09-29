@@ -19,6 +19,7 @@ function cleanLevenshtein(ops) {
       i += 2;
       continue;
     }
+    //this is not necessary for myers algorithm, because it it greedy by default.
     if ((oneOp === 'I' || oneOp === 'D') && twoOp === 'M') {
       //if the head of the insert/delete matches the head of the match, this is called overlap
       const overlapStr = headMatch(oneStr, twoStr);
@@ -34,6 +35,7 @@ function cleanLevenshtein(ops) {
         continue;
       }
     }
+    //todo the substitute should have lower priority than move operations.
     if (oneOp === 'D' && twoOp === 'S' && oneIndex === twoIndex) {
       res.push(['R', twoIndex, twoStr, twoStr.length + oneStr.length]);
       i++;
