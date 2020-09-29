@@ -10,7 +10,11 @@ function myers(ref, tar) {
   for (let d = 1; d < 10000; d++) {
     res[d] = {};
     for (let k = -d; k <= d; k += 2) {
-      const comingDown = k === -d || k !== d && res[d - 1][k + 1] >= res[d - 1][k - 1];
+      const higherValue = res[d - 1][k + 1];
+      const lowerValue = res[d - 1][k - 1];
+      const comeFromBelow = higherValue === undefined || lowerValue >= higherValue;
+      const comingDown = !comeFromBelow;
+      // const comingDown = k === -d || k !== d && res[d - 1][k + 1] >= res[d - 1][k - 1];
       const previousK = comingDown ? k + 1 : k - 1;
       const previousX = res[d - 1][previousK];
       const nowX = comingDown ? previousX : previousX + 1;
