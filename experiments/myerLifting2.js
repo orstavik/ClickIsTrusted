@@ -56,9 +56,9 @@ function postProcess(coords, ref, tar) {
     if (i > 1 && output[output.length - 1][2] === editType)
       output[output.length - 1][3] += editValue;
     else
-      output.push([editX - 1, editY - 1, editType, editValue]); //todo oneX, oneY??
+      output.push([oneX, oneY, editType, editValue]);
     if (min)
-      output.push([editX, editY, ' ', ref.substr(editX, min)]);//todo editX, oneY?? or editY if it is an insert or something.
+      output.push([editX, editY, ' ', ref.substr(editX, min)]);
     oneX = nextX;
     oneY = nextY;
   }

@@ -8,25 +8,26 @@
 hello sunshine
 <script type="module">
   import {myersDiff, convert} from "./myerLifting2.js";
-  import {testsMyers} from "./levenshteinTests.js";
+  import {testsMyers, bigTest} from "./levenshteinTests.js";
 
   function test(tar, ref, opsExpected) {
-    const start = performance.now();
     const ops = myersDiff(tar, ref);
-    const res = convert(ref, ops);
-    const resInvert = convert(tar, ops, true);
-    // console.log(performance.now() - start);
+    const res = convert(ref, ops, false, tar);
+    const resInvert = convert(tar, ops, true, ref);
     if (res === tar && resInvert === ref && JSON.stringify(ops) === JSON.stringify(opsExpected))
-      return;
+      return [tar, ref, ops];
     console.log("tar:", tar);
     console.log("ref:", ref);
     console.log("Expected:", opsExpected);
     console.log("Real:", ops);
     console.log(JSON.stringify(ops));
+    return [tar, ref, ops];
   }
 
-  for (let t of testsMyers)
-    test(...t);
+  const start = performance.now();
+  const res = testsMyers/*.concat(bigTest)*/.map(t=>test(...t));
+  console.log(performance.now() - start);
+  // console.log(JSON.stringify(res));
 </script>
 </body>
 </html>
