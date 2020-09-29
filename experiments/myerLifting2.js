@@ -16,7 +16,7 @@ function myers(ref, tar) {
       const nowX = comingDown ? previousX : previousX + 1;
       const nowY = nowX - k;
       let n = 0;
-      while (ref[nowX + n] === tar[nowY + n] && nowY + n < endX && nowY + n < endY)
+      while (ref[nowX + n] === tar[nowY + n] && nowX + n < endX && nowY + n < endY)
         n++;
       res[d][k] = nowX + n;
       if (nowX + n === endX && nowY + n === endY)

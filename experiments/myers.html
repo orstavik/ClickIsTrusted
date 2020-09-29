@@ -15,21 +15,18 @@ hello sunshine
     const ops = myersDiff(tar, ref);
     const res = convert(ref, ops);
     const resInvert = convert(tar, ops, true);
-    console.log(performance.now() - start);
+    // console.log(performance.now() - start);
     if (res === tar && resInvert === ref && JSON.stringify(ops) === JSON.stringify(opsExpected))
       return;
     console.log("tar:", tar);
     console.log("ref:", ref);
     console.log("Expected:", opsExpected);
     console.log("Real:", ops);
+    console.log(JSON.stringify(ops));
   }
 
-  test('bc', 'c', []);
-  test('c', 'bc', []);
-  // test('abc', 'ac', []);
-  // test('ac', 'abc', []);
-  // for (let t of testsMyers)
-  //   test(...t);
+  for (let t of testsMyers)
+    test(...t);
 </script>
 </body>
 </html>
