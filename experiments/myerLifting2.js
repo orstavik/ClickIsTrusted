@@ -1,8 +1,4 @@
-export function convert(ref, ops, targetToRef) {
-  return ops.filter(op => op[2] !== (targetToRef ? '+' : '-')).map(op => op[3]).join('');
-}
-
-export function myersDiff(tar, ref) {
+function myers(ref, tar) {
   const endX = ref.length;
   const endY = tar.length;
 
@@ -24,7 +20,7 @@ export function myersDiff(tar, ref) {
         n++;
       res[d][k] = nowX + n;
       if (nowX + n === endX && nowY + n === endY)
-        return postProcess(mapToXY(res, d, k), ref, tar);
+        return [res, d, k];
     }
   }
 }
@@ -51,15 +47,26 @@ function postProcess(coords, ref, tar) {
     const min = Math.min(distX, distY);
     const editX = nextX - min;
     const editY = nextY - min;
-    const editOp = distX > distY ?
-      [editX-1, editY-1, '-', ref[oneX]] :
-      [editX-1, editY-1, '+', tar[oneY]];
-    output.push(editOp);
-    // output.push([editX, editY, distX > distY ? '-' : '+', distX > distY ? ref[oneX] : tar[oneY]]);
+    const editType = distX > distY ? '-' : '+';
+    const editValue = distX > distY ? ref[oneX] : tar[oneY];
+    if (i > 1 && output[output.length - 1][2] === editType)
+      output[output.length - 1][3] += editValue;
+    else
+      output.push([editX - 1, editY - 1, editType, editValue]);
     if (min)
       output.push([editX, editY, ' ', ref.substr(editX, min)]);
     oneX = nextX;
     oneY = nextY;
   }
   return output;
+}
+
+export function myersDiff(tar, ref) {
+  const [map, d, k] = myers(ref, tar);
+  const coords = mapToXY(map, d, k);
+  return postProcess(coords, ref, tar);
+}
+
+export function convert(ref, ops, targetToRef) {
+  return ops.filter(op => op[2] !== (targetToRef ? '+' : '-')).map(op => op[3]).join('');
 }

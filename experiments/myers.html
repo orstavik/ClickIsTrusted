@@ -8,30 +8,28 @@
 hello sunshine
 <script type="module">
   import {myersDiff, convert} from "./myerLifting2.js";
-  import {tests2} from "./levenshteinTests.js";
+  import {testsMyers} from "./levenshteinTests.js";
 
-  function test(tar1, ref1) {
+  function test(tar, ref, opsExpected) {
     const start = performance.now();
-    const ops = myersDiff(tar1, ref1);
-    console.log(ops);
-    const res = convert(ref1, ops);
-    console.log(res, res === tar1);
-    const resInvert = convert(tar1, ops, true);
-    console.log(resInvert, resInvert === ref1);
+    const ops = myersDiff(tar, ref);
+    const res = convert(ref, ops);
+    const resInvert = convert(tar, ops, true);
     console.log(performance.now() - start);
+    if (res === tar && resInvert === ref && JSON.stringify(ops) === JSON.stringify(opsExpected))
+      return;
+    console.log("tar:", tar);
+    console.log("ref:", ref);
+    console.log("Expected:", opsExpected);
+    console.log("Real:", ops);
   }
 
-  //works
-  test("zce", "cde");
-  test("aaazced", "abcdef");
-  test('CBABAC', 'ABCABBA');
-  test('A', 'B');
-  test('aa', 'aaB');
-  test('AB', 'CD');
-  test('ABCDEF', 'MNOPQRS');
-
-  for (let t of tests2)
-    test(t[0], t[1]);
+  test('bc', 'c', []);
+  test('c', 'bc', []);
+  // test('abc', 'ac', []);
+  // test('ac', 'abc', []);
+  // for (let t of testsMyers)
+  //   test(...t);
 </script>
 </body>
 </html>
