@@ -39,7 +39,7 @@ function makeInsertDeleteSnake(res, d, k) {
   return coords;
 }
 
-function makeInsertDeleteMatchSnake(coords, ref, tar) {
+function splitMatchInSnake(coords) {
   let [oneX, oneY] = coords[0];
   const output = oneX ? [[0, 0, ' ', oneX]] : [];
   for (let i = 1; i < coords.length; i++) {
@@ -47,20 +47,21 @@ function makeInsertDeleteMatchSnake(coords, ref, tar) {
     const distX = nextX - oneX;
     const distY = nextY - oneY;
     const min = Math.min(distX, distY);
-    const editX = nextX - min;
-    const editY = nextY - min;
     const editType = distX > distY ? '-' : '+';
     if (i > 1 && output[output.length - 1][2] === editType)
       output[output.length - 1][3] += 1;
     else
       output.push([oneX, oneY, editType, 1]);
     if (min)
-      output.push([editX, editY, ' ', min]);
+      output.push([nextX - min, nextY - min, ' ', min]);
     oneX = nextX;
     oneY = nextY;
   }
-  output.forEach(op => op[2] === '+' ? op[3] = tar.substr(op[1], op[3]) : op[3] = ref.substr(op[0], op[3]));
   return output;
+}
+
+function addStrings(output, tar, ref) {
+  output.forEach(op => op[2] === '+' ? op[3] = tar.substr(op[1], op[3]) : op[3] = ref.substr(op[0], op[3]));
 }
 
 function manInTheMiddleShouldBeLast(ops) {
@@ -83,7 +84,8 @@ function manInTheMiddleShouldBeLast(ops) {
 export function myersDiff(tar, ref) {
   const [map, d, k] = myers(ref, tar);
   const coords = makeInsertDeleteSnake(map, d, k);
-  const ops = makeInsertDeleteMatchSnake(coords, ref, tar);
+  const ops = splitMatchInSnake(coords);
+  addStrings(ops, tar, ref);
   return manInTheMiddleShouldBeLast(ops);
 }
 
