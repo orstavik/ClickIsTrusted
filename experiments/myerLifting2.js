@@ -94,12 +94,12 @@ export function myersDiff(tar, ref) {
   return manInTheMiddleShouldBeLast(ops);
 }
 
-//todo the inverse ops should be simpler once we have a dictionary. Then we just need to reverse the op, as the dictionary is external.
-//todo make the -1 for the not active insert/delete prop
-export function inverseOps(ops) {
+//working function, but should be employed from the diffDictionary, and not directly on a list of ops.
+function inverseOps(ops) {
   return ops.map(([x, y, op, length, str]) => [y, x, op === '-' ? '+' : op === '+' ? '-' : op, length, str]);
 }
 
-export function convert(ref, ops) {
+//working function, but should be employed from the diffDictionary, and not directly on a list of ops.
+function convert(ref, ops) {
   return ops.filter(op => op[2] !== '-').map(op => op[4]).join('');
 }

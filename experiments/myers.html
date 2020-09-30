@@ -7,25 +7,27 @@
 <body>
 hello sunshine
 <script type="module">
-  import {myersDiff, convert, inverseOps} from "./myerLifting2.js";
+  import {myersDiff} from "./myerLifting2.js";
+  import {makeDictDiff, inverseDiff, convert as convert2} from "./myerDict.js";
   import {testsMyers, bigTest} from "./myersTests.js";
 
-  function test(tar, ref, opsRawExpect) {
-    let ops = myersDiff(tar, ref);
+  function test(tar, ref, opsExpect) {
+    let editOps = myersDiff(tar, ref);
 
-    //todo convert to dict/ops here..
+    const diff = makeDictDiff(editOps, tar, ref);
+    let ref2 = convert2(diff);
 
-    const res = convert(ref, ops);
-    const spo = inverseOps(ops);
-    const resInvert = convert(tar, spo);
-    if (res === tar && resInvert === ref && JSON.stringify(ops) === JSON.stringify(opsRawExpect))
-      return [tar, ref, ops];
+    let inverse = inverseDiff(diff);
+    let tar2 = convert2(inverse);
+
+    if (ref2 === tar && tar2 === ref && JSON.stringify(editOps) === JSON.stringify(opsExpect))
+      return [tar, ref, editOps];
     console.log("tar:", tar);
     console.log("ref:", ref);
-    console.log("Expected:", opsRawExpect);
-    console.log("Real:", ops);
-    console.log(JSON.stringify(ops));
-    return [tar, ref, ops];
+    console.log("Expected:", opsExpect);
+    console.log("Real:", editOps);
+    console.log(JSON.stringify(editOps));
+    return [tar, ref, editOps];
   }
 
   const start = performance.now();
