@@ -7,28 +7,25 @@
 <body>
 hello sunshine
 <script type="module">
-  import {unify} from "./myerUnify.js";
-  import {myersDiff, convert} from "./myerLifting2.js";
-  import {testsMyers, bigTest} from "./levenshteinTests.js";
+  import {myersDiff, convert, inverseOps} from "./myerLifting2.js";
+  import {testsMyers, bigTest} from "./myersTests.js";
 
-  function test(tar, ref, opsRawExpect, opsCleanExpect) {
-    let opsRaw = myersDiff(tar, ref);
-    let opsClean = unify(opsRaw);
-    const res = convert(ref, opsClean, false, tar);
-    const resInvert = convert(tar, opsClean, true, ref);
-    if (
-      res === tar &&
-      resInvert === ref &&
-      JSON.stringify(opsRaw) === JSON.stringify(opsRawExpect) &&
-      JSON.stringify(opsClean) === JSON.stringify(opsCleanExpect || opsRaw)
-    )
-      return [tar, ref, opsClean];
+  function test(tar, ref, opsRawExpect) {
+    let ops = myersDiff(tar, ref);
+
+    //todo convert to dict/ops here..
+
+    const res = convert(ref, ops);
+    const spo = inverseOps(ops);
+    const resInvert = convert(tar, spo);
+    if (res === tar && resInvert === ref && JSON.stringify(ops) === JSON.stringify(opsRawExpect))
+      return [tar, ref, ops];
     console.log("tar:", tar);
     console.log("ref:", ref);
     console.log("Expected:", opsRawExpect);
-    console.log("Real:", opsClean);
-    console.log(JSON.stringify(opsClean));
-    return [tar, ref, opsClean];
+    console.log("Real:", ops);
+    console.log(JSON.stringify(ops));
+    return [tar, ref, ops];
   }
 
   const start = performance.now();

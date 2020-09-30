@@ -65,12 +65,34 @@ function postProcess(coords, ref, tar) {
   return output;
 }
 
+function manInTheMiddleShouldBeLast(ops) {
+  const res = [];
+  for (let i = 0; i < ops.length; i++) {
+    const [oneIndex, oneIndex2, oneOp, oneStr] = ops[i];
+    const [twoIndex, twoIndex2, twoOp, twoStr] = ops[i + 1] || [];
+    const [threeIndex, threeIndex2, threeOp, threeStr] = ops[i + 2] || [];
+    if (oneOp === '+' && twoOp === ' ' && threeOp === '+' && threeStr.endsWith(twoStr)) {
+      res.push([oneIndex, oneIndex2, oneOp, oneStr + twoStr + threeStr.substr(0, threeStr.length - twoStr.length)]);
+      res.push([twoIndex + threeStr.length, twoIndex2 + threeStr.length, twoOp, twoStr]);
+      i += 2;
+    } else {
+      res.push(ops[i]);
+    }
+  }
+  return res;
+}
+
 export function myersDiff(tar, ref) {
   const [map, d, k] = myers(ref, tar);
   const coords = mapToXY(map, d, k);
-  return postProcess(coords, ref, tar);
+  const ops = postProcess(coords, ref, tar);
+  return manInTheMiddleShouldBeLast(ops);
 }
 
-export function convert(ref, ops, targetToRef) {
-  return ops.filter(op => op[2] !== (targetToRef ? '+' : '-')).map(op => op[3]).join('');
+export function inverseOps(ops) {
+  return ops.map(([x, y, op, str]) => [y, x, op === '-' ? '+' : op === '+' ? '-' : op, str]);
+}
+
+export function convert(ref, ops) {
+  return ops.filter(op => op[2] !== '-').map(op => op[3]).join('');
 }
