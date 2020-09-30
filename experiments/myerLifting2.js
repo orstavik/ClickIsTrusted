@@ -70,12 +70,12 @@ function getS(op, tar, ref) {
 function manInTheMiddleShouldBeLast(ops) {
   const res = [];
   for (let i = 0; i < ops.length; i++) {
-    const [oneIndex, oneIndex2, oneOp, oneStr] = ops[i];
-    const [twoIndex, twoIndex2, twoOp, twoStr] = ops[i + 1] || [];
-    const [threeIndex, threeIndex2, threeOp, threeStr] = ops[i + 2] || [];
+    const [oneIndex, oneIndex2, oneOp, oneLength, oneStr] = ops[i];
+    const [twoIndex, twoIndex2, twoOp, twoLength, twoStr] = ops[i + 1] || [];
+    const [threeIndex, threeIndex2, threeOp, threeLength, threeStr] = ops[i + 2] || [];
     if (oneOp === '+' && twoOp === ' ' && threeOp === '+' && threeStr.endsWith(twoStr)) {
-      res.push([oneIndex, oneIndex2, oneOp, oneStr + twoStr + threeStr.substr(0, threeStr.length - twoStr.length)]);
-      res.push([twoIndex + threeStr.length, twoIndex2 + threeStr.length, twoOp, twoStr]);
+      res.push([oneIndex, oneIndex2, oneOp, oneLength + threeLength, (oneStr + twoStr + threeStr).substr(0, oneLength + threeLength)]);
+      res.push([twoIndex + threeStr.length, twoIndex2 + threeStr.length, twoOp, twoLength, twoStr]);
       i += 2;
     } else {
       res.push(ops[i]);
@@ -88,14 +88,14 @@ export function myersDiff(tar, ref) {
   const [map, d, k] = myers(ref, tar);
   const coords = makeInsertDeleteSnake(map, d, k);
   const ops = splitMatchInSnake(coords);
-  ops.forEach(op => op[3] = getS(op, tar, ref));
+  ops.forEach(op => op.push(getS(op, tar, ref)));
   return manInTheMiddleShouldBeLast(ops);
 }
 
 export function inverseOps(ops) {
-  return ops.map(([x, y, op, str]) => [y, x, op === '-' ? '+' : op === '+' ? '-' : op, str]);
+  return ops.map(([x, y, op, length, str]) => [y, x, op === '-' ? '+' : op === '+' ? '-' : op, length, str]);
 }
 
 export function convert(ref, ops) {
-  return ops.filter(op => op[2] !== '-').map(op => op[3]).join('');
+  return ops.filter(op => op[2] !== '-').map(op => op[4]).join('');
 }
