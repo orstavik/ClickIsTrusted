@@ -52,8 +52,10 @@ function splitMatchInSnake(coords) {
     const editType = distX > distY ? '-' : '+';
     if (output[output.length - 1][2] === editType)
       output[output.length - 1][3] += 1;
-    else
-      output.push([oneX, oneY, editType, 1]);
+    else {
+      const edit = editType === '-' ? [oneX, -1, '-', 1] : [-1, oneY, '+', 1];
+      output.push(edit);
+    }
     if (min)
       output.push([twoX - min, twoY - min, ' ', min]);
   }
@@ -88,10 +90,12 @@ export function myersDiff(tar, ref) {
   const [map, d, k] = myers(ref, tar);
   const coords = makeInsertDeleteSnake(map, d, k);
   const ops = splitMatchInSnake(coords);
-  ops.forEach(op => op.push(getS(op, tar, ref)));
+  ops.forEach(op => op.push(getS(op, tar, ref)));//adding strings
   return manInTheMiddleShouldBeLast(ops);
 }
 
+//todo the inverse ops should be simpler once we have a dictionary. Then we just need to reverse the op, as the dictionary is external.
+//todo make the -1 for the not active insert/delete prop
 export function inverseOps(ops) {
   return ops.map(([x, y, op, length, str]) => [y, x, op === '-' ? '+' : op === '+' ? '-' : op, length, str]);
 }
