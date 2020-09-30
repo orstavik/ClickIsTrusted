@@ -32,7 +32,7 @@ function makeInsertDeleteSnake(res, d, k) {
   const coords = Array(d + 1);
   const first = res[0][0];
   coords[0] = [first, first];
-  for (;d > 0; d--) {
+  for (; d > 0; d--) {
     const x = res[d][k];
     coords[d] = [x, x - k];
     res[d - 1][k - 1] >= res[d - 1][k + 1] || res[d - 1][k + 1] === undefined ? k-- : k++;
@@ -43,14 +43,14 @@ function makeInsertDeleteSnake(res, d, k) {
 //splits the matching sequences away from the insert/delete steps, and then merges sequences of inserts and deletes
 function splitMatchInSnake(coords) {
   let [oneX, oneY] = coords[0];
-  const output = oneX ? [[0, 0, ' ', oneX]] : [];
+  const output = [[0, 0, ' ', oneX]];
   for (let i = 1; i < coords.length; i++) {
     const [nextX, nextY] = coords[i];
     const distX = nextX - oneX;
     const distY = nextY - oneY;
     const min = Math.min(distX, distY);
     const editType = distX > distY ? '-' : '+';
-    if (i > 1 && output[output.length - 1][2] === editType)
+    if (output[output.length - 1][2] === editType)
       output[output.length - 1][3] += 1;
     else
       output.push([oneX, oneY, editType, 1]);
@@ -59,6 +59,8 @@ function splitMatchInSnake(coords) {
     oneX = nextX;
     oneY = nextY;
   }
+  if (output[0][3] === 0) //removes the first match if it is empty
+    output.shift();
   return output;
 }
 
