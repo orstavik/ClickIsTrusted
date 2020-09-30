@@ -27,7 +27,7 @@ function myers(ref, tar) {
   }
 }
 
-function mapToXY(res, d, k) {
+function makeInsertDeleteSnake(res, d, k) {
   const coords = Array(d + 1);
   const first = res[0][0];
   coords[0] = [first, first];
@@ -39,7 +39,7 @@ function mapToXY(res, d, k) {
   return coords;
 }
 
-function postProcess(coords, ref, tar) {
+function makeInsertDeleteMatchSnake(coords, ref, tar) {
   let [oneX, oneY] = coords[0];
   const output = oneX ? [[0, 0, ' ', oneX]] : [];
   for (let i = 1; i < coords.length; i++) {
@@ -82,8 +82,8 @@ function manInTheMiddleShouldBeLast(ops) {
 
 export function myersDiff(tar, ref) {
   const [map, d, k] = myers(ref, tar);
-  const coords = mapToXY(map, d, k);
-  const ops = postProcess(coords, ref, tar);
+  const coords = makeInsertDeleteSnake(map, d, k);
+  const ops = makeInsertDeleteMatchSnake(coords, ref, tar);
   return manInTheMiddleShouldBeLast(ops);
 }
 
