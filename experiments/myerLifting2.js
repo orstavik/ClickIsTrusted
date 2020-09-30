@@ -27,18 +27,20 @@ function myers(ref, tar) {
   }
 }
 
+//converts d,k to x,y
 function makeInsertDeleteSnake(res, d, k) {
   const coords = Array(d + 1);
   const first = res[0][0];
   coords[0] = [first, first];
-  for (let i = d; i > 0; i--) {
-    const x = res[i][k];
-    coords[i] = [x, x - k];
-    res[i - 1][k - 1] >= res[i - 1][k + 1] || res[i - 1][k + 1] === undefined ? k-- : k++;
+  for (;d > 0; d--) {
+    const x = res[d][k];
+    coords[d] = [x, x - k];
+    res[d - 1][k - 1] >= res[d - 1][k + 1] || res[d - 1][k + 1] === undefined ? k-- : k++;
   }
   return coords;
 }
 
+//splits the matching sequences away from the insert/delete steps, and then merges sequences of inserts and deletes
 function splitMatchInSnake(coords) {
   let [oneX, oneY] = coords[0];
   const output = oneX ? [[0, 0, ' ', oneX]] : [];
@@ -60,6 +62,7 @@ function splitMatchInSnake(coords) {
   return output;
 }
 
+//adds strings to the list of operations
 function addStrings(output, tar, ref) {
   output.forEach(op => op[2] === '+' ? op[3] = tar.substr(op[1], op[3]) : op[3] = ref.substr(op[0], op[3]));
 }
