@@ -42,12 +42,12 @@ function makeInsertDeleteSnake(res, d, k) {
 
 //splits the matching sequences away from the insert/delete steps, and then merges sequences of inserts and deletes
 function splitMatchInSnake(coords) {
-  let [oneX, oneY] = coords[0];
-  const output = [[0, 0, ' ', oneX]];
+  const output = [[0, 0, ' ', coords[0][0]]];
   for (let i = 1; i < coords.length; i++) {
-    const [nextX, nextY] = coords[i];
-    const distX = nextX - oneX;
-    const distY = nextY - oneY;
+    const [oneX, oneY] = coords[i-1];
+    const [twoX, twoY] = coords[i];
+    const distX = twoX - oneX;
+    const distY = twoY - oneY;
     const min = Math.min(distX, distY);
     const editType = distX > distY ? '-' : '+';
     if (output[output.length - 1][2] === editType)
@@ -55,9 +55,7 @@ function splitMatchInSnake(coords) {
     else
       output.push([oneX, oneY, editType, 1]);
     if (min)
-      output.push([nextX - min, nextY - min, ' ', min]);
-    oneX = nextX;
-    oneY = nextY;
+      output.push([twoX - min, twoY - min, ' ', min]);
   }
   if (output[0][3] === 0) //removes the first match if it is empty
     output.shift();
