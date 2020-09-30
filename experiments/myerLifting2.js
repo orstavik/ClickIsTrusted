@@ -41,7 +41,7 @@ function mapToXY(res, d, k) {
 
 function postProcess(coords, ref, tar) {
   let [oneX, oneY] = coords[0];
-  const output = oneX ? [[0, 0, ' ', ref.substr(0, oneX)]] : [];
+  const output = oneX ? [[0, 0, ' ', oneX]] : [];
   for (let i = 1; i < coords.length; i++) {
     const [nextX, nextY] = coords[i];
     const distX = nextX - oneX;
@@ -50,16 +50,16 @@ function postProcess(coords, ref, tar) {
     const editX = nextX - min;
     const editY = nextY - min;
     const editType = distX > distY ? '-' : '+';
-    const editValue = distX > distY ? ref[oneX] : tar[oneY];
     if (i > 1 && output[output.length - 1][2] === editType)
-      output[output.length - 1][3] += editValue;
+      output[output.length - 1][3] += 1;
     else
-      output.push([oneX, oneY, editType, editValue]);
+      output.push([oneX, oneY, editType, 1]);
     if (min)
-      output.push([editX, editY, ' ', ref.substr(editX, min)]);
+      output.push([editX, editY, ' ', min]);
     oneX = nextX;
     oneY = nextY;
   }
+  output.forEach(op => op[2] === '+' ? op[3] = tar.substr(op[1], op[3]) : op[3] = ref.substr(op[0], op[3]));
   return output;
 }
 
