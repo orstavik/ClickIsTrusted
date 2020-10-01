@@ -19,7 +19,7 @@ export function makeDictDiff(rawOps, tar, ref, minPartialLength) {
   return diff;
 }
 
-//mutates the diff
+//update the -1 values only, otherwise keep the first appearance of the substring
 export function enhanceDiff(diff) {
   for (let key of Object.keys(diff.dict)) {
     if (diff.dict[key][0] === -1)
