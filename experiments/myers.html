@@ -8,28 +8,33 @@
 hello sunshine
 <script type="module">
   import {myersDiff} from "./myerLifting2.js";
-  import {makeDictDiff, inverseDiff, convert as convert2} from "./myerDict.js";
+  import {makeDictDiff, inverseDiff, convert, compress, extract} from "./myerDict.js";
   import {testDictionary/*, testsMyers, bigTest*/} from "./myersTests.js";
 
   function test(tar, ref, diffExpect) {
     let editOps = myersDiff(tar, ref);
 
     let diff = makeDictDiff(editOps, tar, ref, 0);
-    let tar2 = convert2(diff);
+    let tar2 = convert(diff);
 
     let inverse = inverseDiff(diff);
-    let ref2 = convert2(inverse);
+    let ref2 = convert(inverse);
+
+    let minDiff = compress(diff);
+    let maxDiff = extract(minDiff, ref);
 
     const sameResults = tar2 === tar && ref2 === ref;
     const sameDictionary = JSON.stringify(diff.dict) === JSON.stringify(diffExpect.dict);
     const sameOpsList = JSON.stringify(diff.ops) === JSON.stringify(diffExpect.ops);
-    if (!(sameResults && sameDictionary && sameOpsList)) {
+    const extractIsOk1 = JSON.stringify(maxDiff.dict) === JSON.stringify(diff.dict);
+    const extractIsOk2 = JSON.stringify(maxDiff.ops) === JSON.stringify(diff.ops);
+    if (!(sameResults && sameDictionary && sameOpsList && extractIsOk1 && extractIsOk2)) {
       console.log("tar:", tar);
       console.log("ref:", ref);
       console.log("Expected:", diffExpect);
       console.log("Real:", editOps);
       console.log("RealDiff:", diff);
-      console.log(JSON.stringify(editOps));
+      console.log(JSON.stringify(diff));
     }
     return [tar, ref, diff];
   }
