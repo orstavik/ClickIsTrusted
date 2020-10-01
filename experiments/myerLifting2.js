@@ -76,8 +76,8 @@ function manInTheMiddleShouldBeLast(ops) {
     const [twoIndex, twoIndex2, twoOp, twoLength, twoStr] = ops[i + 1] || [];
     const [threeIndex, threeIndex2, threeOp, threeLength, threeStr] = ops[i + 2] || [];
     if (oneOp === '+' && twoOp === ' ' && threeOp === '+' && threeStr.endsWith(twoStr)) {
-      res.push([oneIndex, oneIndex2, oneOp, oneLength + threeLength, (oneStr + twoStr + threeStr).substr(0, oneLength + threeLength)]);
-      res.push([twoIndex + threeStr.length, twoIndex2 + threeStr.length, twoOp, twoLength, twoStr]);
+      res.push([oneIndex, oneIndex2, '+', oneLength + threeLength, (oneStr + twoStr + threeStr).substr(0, oneLength + threeLength)]);
+      res.push([twoIndex, twoIndex2 + threeStr.length, ' ', twoLength, twoStr]);
       i += 2;
     } else {
       res.push(ops[i]);
