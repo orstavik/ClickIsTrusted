@@ -1,3 +1,33 @@
+function findPartialCopiesRedactsHead({dict, ops, ref, tar}, minPartialLength = 16) {
+  for (let [key, coord] of Object.entries(dict)) {
+    if (coord[0] === -1) {
+      const minHead = key.substr(0, minPartialLength);
+      let headIndex = ref.indexOf(minHead);
+      if (headIndex === -1)
+        continue;
+      let i = minPartialLength;
+      while (key[i] === ref[headIndex + i])
+        i++;
+      const head = key.substr(0, i);
+      const tail = key.substr(head.length);
+
+      //split all the original ops with this combined head and tail into two ops.
+      let op = ops.find(([op, str]) => str === key);
+      while (op){
+        ops.splice(ops.indexOf(op), 1, [op[0], head], [op[0], tail]);
+        op = ops.find(([op, str]) => str === key);
+      }
+
+      if (!dict[head])
+        dict[head] = [headIndex, coord[1], head.length];
+      if (!dict[tail])
+        dict[tail] = [-1, coord[1] + head.length, tail.length];
+      delete dict[key];
+    }
+  }
+}
+
+//
 export function makeDictDiff(rawOps, tar, ref, minPartialLength) {
   const dict = {};
   const ops = [];
@@ -12,22 +42,22 @@ export function makeDictDiff(rawOps, tar, ref, minPartialLength) {
 
     ops.push([op, str]);
   }
-  let diff = {ref, tar, dict, ops};
-  diff = enhanceDiff(diff);
+  const diff = {ref, tar, dict, ops};
+  findCopyExtraAndRedactRedundant(diff);
+  findPartialCopiesRedactsHead(diff, minPartialLength);
   // diff = enhanceDiff(diff, minPartialLength);
   //todo here we need to enhance further, ie. search for partial copies of at both the head and tail of words not yet matched on both sides.
   return diff;
 }
 
-//update the -1 values only, otherwise keep the first appearance of the substring
-export function enhanceDiff(diff) {
-  for (let key of Object.keys(diff.dict)) {
-    if (diff.dict[key][0] === -1)
-      diff.dict[key][0] = diff.ref.indexOf(key);
-    else if (diff.dict[key][1] === -1)
-      diff.dict[key][1] = diff.tar.indexOf(key);
+
+//if a dict entry has x = -1 / y = -1, try to find another coordinate in another part of ref / tar.
+//This essentially equals "copy extra" and "redact redundant" operations.
+export function findCopyExtraAndRedactRedundant({dict, ref, tar}) {
+  for (let [key, coord] of Object.entries(dict)) {
+    if (coord[0] === -1) coord[0] = ref.indexOf(key);
+    if (coord[1] === -1) coord[1] = tar.indexOf(key);
   }
-  return diff;
 }
 
 export function inverseDiff(diffDict) {

@@ -1,131 +1,135 @@
-export const testDictionary = [["zc", "cd", {
-  "dict": {"z": [-1, 0, 1], "c": [0, 1, 1], "d": [1, -1, 1]},
-  "ops": [["+", "z"], [" ", "c"], ["-", "d"]]
-}], ["cde", "zce", {
-  "dict": {"z": [0, -1, 1], "c": [1, 0, 1], "d": [-1, 1, 1], "e": [2, 2, 1]},
-  "ops": [["-", "z"], [" ", "c"], ["+", "d"], [" ", "e"]]
-}], ["zce", "cde", {
-  "dict": {"z": [-1, 0, 1], "c": [0, 1, 1], "d": [1, -1, 1], "e": [2, 2, 1]},
-  "ops": [["+", "z"], [" ", "c"], ["-", "d"], [" ", "e"]]
-}], ["CBABAC", "ABCABBA", {
-  "dict": {"AB": [0, 2, 2], "C": [2, 0, 1], "B": [5, 1, 1], "A": [6, 4, 1]},
-  "ops": [["-", "AB"], [" ", "C"], ["+", "B"], [" ", "AB"], ["-", "B"], [" ", "A"], ["+", "C"]]
-}], ["aa", "aaB", {
-  "dict": {"aa": [0, 0, 2], "B": [2, -1, 1]},
-  "ops": [[" ", "aa"], ["-", "B"]]
-}], ["A", "B", {
-  "dict": {"B": [0, -1, 1], "A": [-1, 0, 1]},
-  "ops": [["-", "B"], ["+", "A"]]
-}], ["AB", "CD", {
-  "dict": {"CD": [0, -1, 2], "AB": [-1, 0, 2]},
-  "ops": [["-", "CD"], ["+", "AB"]]
-}], ["ABCDEF", "MNOPQRS", {
-  "dict": {"MNOPQRS": [0, -1, 7], "ABCDEF": [-1, 0, 6]},
-  "ops": [["-", "MNOPQRS"], ["+", "ABCDEF"]]
-}], ["asab", "saab", {
-  "dict": {"a": [2, 0, 1], "sa": [0, 1, 2], "b": [3, 3, 1]},
-  "ops": [["+", "a"], [" ", "sa"], ["-", "a"], [" ", "b"]]
-}], ["ab", "abab", {
-  "dict": {"ab": [0, 0, 2]},
-  "ops": [[" ", "ab"], ["-", "ab"]]
-}], ["bc", "c", {
-  "dict": {"b": [-1, 0, 1], "c": [0, 1, 1]},
-  "ops": [["+", "b"], [" ", "c"]]
-}], ["c", "bc", {
-  "dict": {"b": [0, -1, 1], "c": [1, 0, 1]},
-  "ops": [["-", "b"], [" ", "c"]]
-}], ["abc", "ac", {
-  "dict": {"a": [0, 0, 1], "b": [-1, 1, 1], "c": [1, 2, 1]},
-  "ops": [[" ", "a"], ["+", "b"], [" ", "c"]]
-}], ["ac", "abc", {
-  "dict": {"a": [0, 0, 1], "b": [1, -1, 1], "c": [2, 1, 1]},
-  "ops": [[" ", "a"], ["-", "b"], [" ", "c"]]
-}], ["favorite", "fervourite", {
-  "dict": {
-    "f": [0, 0, 1],
-    "er": [1, -1, 2],
-    "a": [-1, 1, 1],
-    "vo": [3, 2, 2],
-    "u": [5, -1, 1],
-    "rite": [6, 4, 4]
-  }, "ops": [[" ", "f"], ["-", "er"], ["+", "a"], [" ", "vo"], ["-", "u"], [" ", "rite"]]
-}], ["fervourite", "favorite", {
-  "dict": {
-    "f": [0, 0, 1],
-    "a": [1, -1, 1],
-    "er": [-1, 1, 2],
-    "vo": [2, 3, 2],
-    "u": [-1, 5, 1],
-    "rite": [4, 6, 4]
-  }, "ops": [[" ", "f"], ["-", "a"], ["+", "er"], [" ", "vo"], ["+", "u"], [" ", "rite"]]
-}], ["3a3a", "a", {
-  "dict": {"3a3": [-1, 0, 3], "a": [0, 3, 1]},
-  "ops": [["+", "3a3"], [" ", "a"]]
-}], ["aaazced", "abcdef", {
-  "dict": {
-    "a": [0, 0, 1],
-    "b": [1, -1, 1],
-    "aaz": [-1, 1, 3],
-    "c": [2, 4, 1],
-    "d": [3, 6, 1],
-    "e": [4, 5, 1],
-    "f": [5, -1, 1]
-  }, "ops": [[" ", "a"], ["-", "b"], ["+", "aaz"], [" ", "c"], ["-", "d"], [" ", "e"], ["-", "f"], ["+", "d"]]
-}], ["abcdef", "aaazced", {
-  "dict": {
-    "a": [0, 0, 1],
-    "aaz": [1, -1, 3],
-    "b": [-1, 1, 1],
-    "c": [4, 2, 1],
-    "e": [5, 4, 1],
-    "d": [6, 3, 1],
-    "ef": [-1, 4, 2]
-  }, "ops": [[" ", "a"], ["-", "aaz"], ["+", "b"], [" ", "c"], ["-", "e"], [" ", "d"], ["+", "ef"]]
-}], ["abcabcdef", "abcdef", {
-  "dict": {"abc": [0, 0, 3], "def": [3, 6, 3]},
-  "ops": [[" ", "abc"], ["+", "abc"], [" ", "def"]]
-}], ["abcdef", "abcabcdef", {
-  "dict": {"abc": [0, 0, 3], "def": [6, 3, 3]},
-  "ops": [[" ", "abc"], ["-", "abc"], [" ", "def"]]
-}], ["abc_abc_ef", "abc_def", {
-  "dict": {"abc_": [0, 0, 4], "d": [4, -1, 1], "ef": [5, 8, 2]},
-  "ops": [[" ", "abc_"], ["-", "d"], ["+", "abc_"], [" ", "ef"]]
-}], ["1abcde2", "abcde", {
-  "dict": {"1": [-1, 0, 1], "2": [-1, 6, 1], "abcde": [0, 1, 5]},
-  "ops": [["+", "1"], [" ", "abcde"], ["+", "2"]]
-}], ["123abcde456", "abcde", {
-  "dict": {"123": [-1, 0, 3], "456": [-1, 8, 3], "abcde": [0, 3, 5]},
-  "ops": [["+", "123"], [" ", "abcde"], ["+", "456"]]
-}], ["English is my favorite subject at school.", "Inglesh iz my fervourite sabject at skool.", {
-  "dict": {
-    "I": [0, -1, 1],
-    "E": [-1, 0, 1],
-    "ngl": [1, 1, 3],
-    "e": [4, 21, 1],
-    "i": [8, 4, 1],
-    "sh i": [5, 5, 4],
-    "z": [9, -1, 1],
-    "s": [5, 9, 1],
-    " my f": [10, 10, 5],
-    "er": [15, -1, 2],
-    "a": [26, 15, 1],
-    "vo": [17, 16, 2],
-    "u": [19, 24, 1],
-    "rite s": [20, 18, 6],
-    "bject at s": [27, 25, 10],
-    "k": [37, -1, 1],
-    "ch": [-1, 35, 2],
-    "ool.": [38, 37, 4]
-  },
-  "ops": [["-", "I"], ["+", "E"], [" ", "ngl"], ["-", "e"], ["+", "i"], [" ", "sh i"], ["-", "z"], ["+", "s"], [" ", " my f"], ["-", "er"], ["+", "a"], [" ", "vo"], ["-", "u"], [" ", "rite s"], ["-", "a"], ["+", "u"], [" ", "bject at s"], ["-", "k"], ["+", "ch"], [" ", "ool."]]
-}], ["ivar--0abcdefghijklmnopqrstuvwxyz_1abcdefghijklmnopqrstuvwxyz_2abcdefghijklmnopqrstuvwxyz_3abcdefghijklmnopqrstuvwxyz_4abcdefghijklmnopqrstuvwxyz_5abcdefghijklmnopqrstuvwxyz_6abcdefghijklmnopqrstuvwxyz_7abcdefghijklmnopqrstuvwxyz_8abcdefghijklmnopqrstuvwxyz_9abcdefghijklmnopqrstuvwxyz--max", "0abcdefghijklmnopqrstuvwxyz_1abcdefghijklmnopqrstuvwxyz_2abcdefghijklmnopqrstuvwxyz_3abcdefghijklmnopqrstuvwxyz_4abcdefghijklmnopqrstuvwxyz_5abcdefghijklmnopqrstuvwxyz_6abcdefghijklmnopqrstuvwxyz_7abcdefghijklmnopqrstuvwxyz_8abcdefghijklmnopqrstuvwxyz_9abcdefghijklmnopqrstuvwxyz", {
-  "dict": {
-    "ivar--": [-1, 0, 6],
-    "0abcdefghijklmnopqrstuvwxyz_1abcdefghijklmnopqrstuvwxyz_2abcdefghijklmnopqrstuvwxyz_3abcdefghijklmnopqrstuvwxyz_4abcdefghijklmnopqrstuvwxyz_5abcdefghijklmnopqrstuvwxyz_6abcdefghijklmnopqrstuvwxyz_7abcdefghijklmnopqrstuvwxyz_8abcdefghijklmnopqrstuvwxyz_9abcdefghijklmnopqrstuvwxyz": [0, 6, 279],
-    "--max": [-1, 285, 5]
-  },
-  "ops": [["+", "ivar--"], [" ", "0abcdefghijklmnopqrstuvwxyz_1abcdefghijklmnopqrstuvwxyz_2abcdefghijklmnopqrstuvwxyz_3abcdefghijklmnopqrstuvwxyz_4abcdefghijklmnopqrstuvwxyz_5abcdefghijklmnopqrstuvwxyz_6abcdefghijklmnopqrstuvwxyz_7abcdefghijklmnopqrstuvwxyz_8abcdefghijklmnopqrstuvwxyz_9abcdefghijklmnopqrstuvwxyz"], ["+", "--max"]]
-}]];
+export const testDictionary = [
+  ["abcdefghijklmnopqrstuvwxyz_abcdefghijklmnopqrstXXXuvw", "abcdefghijklmnopqrstuvwxyz_", {
+    "dict": {"abcdefghijklmnopqrstuvwxyz_": [0, 0, 27], "abcdefghijklmnopqrst": [0, 27, 20], "XXXuvw": [-1, 47, 6]},
+    "ops": [[" ", "abcdefghijklmnopqrstuvwxyz_"], ["+", "abcdefghijklmnopqrst"], ["+", "XXXuvw"]]
+  }], ["zc", "cd", {
+    "dict": {"z": [-1, 0, 1], "c": [0, 1, 1], "d": [1, -1, 1]},
+    "ops": [["+", "z"], [" ", "c"], ["-", "d"]]
+  }], ["cde", "zce", {
+    "dict": {"z": [0, -1, 1], "c": [1, 0, 1], "d": [-1, 1, 1], "e": [2, 2, 1]},
+    "ops": [["-", "z"], [" ", "c"], ["+", "d"], [" ", "e"]]
+  }], ["zce", "cde", {
+    "dict": {"z": [-1, 0, 1], "c": [0, 1, 1], "d": [1, -1, 1], "e": [2, 2, 1]},
+    "ops": [["+", "z"], [" ", "c"], ["-", "d"], [" ", "e"]]
+  }], ["CBABAC", "ABCABBA", {
+    "dict": {"AB": [0, 2, 2], "C": [2, 0, 1], "B": [5, 1, 1], "A": [6, 4, 1]},
+    "ops": [["-", "AB"], [" ", "C"], ["+", "B"], [" ", "AB"], ["-", "B"], [" ", "A"], ["+", "C"]]
+  }], ["aa", "aaB", {
+    "dict": {"aa": [0, 0, 2], "B": [2, -1, 1]},
+    "ops": [[" ", "aa"], ["-", "B"]]
+  }], ["A", "B", {
+    "dict": {"B": [0, -1, 1], "A": [-1, 0, 1]},
+    "ops": [["-", "B"], ["+", "A"]]
+  }], ["AB", "CD", {
+    "dict": {"CD": [0, -1, 2], "AB": [-1, 0, 2]},
+    "ops": [["-", "CD"], ["+", "AB"]]
+  }], ["ABCDEF", "MNOPQRS", {
+    "dict": {"MNOPQRS": [0, -1, 7], "ABCDEF": [-1, 0, 6]},
+    "ops": [["-", "MNOPQRS"], ["+", "ABCDEF"]]
+  }], ["asab", "saab", {
+    "dict": {"a": [2, 0, 1], "sa": [0, 1, 2], "b": [3, 3, 1]},
+    "ops": [["+", "a"], [" ", "sa"], ["-", "a"], [" ", "b"]]
+  }], ["ab", "abab", {
+    "dict": {"ab": [0, 0, 2]},
+    "ops": [[" ", "ab"], ["-", "ab"]]
+  }], ["bc", "c", {
+    "dict": {"b": [-1, 0, 1], "c": [0, 1, 1]},
+    "ops": [["+", "b"], [" ", "c"]]
+  }], ["c", "bc", {
+    "dict": {"b": [0, -1, 1], "c": [1, 0, 1]},
+    "ops": [["-", "b"], [" ", "c"]]
+  }], ["abc", "ac", {
+    "dict": {"a": [0, 0, 1], "b": [-1, 1, 1], "c": [1, 2, 1]},
+    "ops": [[" ", "a"], ["+", "b"], [" ", "c"]]
+  }], ["ac", "abc", {
+    "dict": {"a": [0, 0, 1], "b": [1, -1, 1], "c": [2, 1, 1]},
+    "ops": [[" ", "a"], ["-", "b"], [" ", "c"]]
+  }], ["favorite", "fervourite", {
+    "dict": {
+      "f": [0, 0, 1],
+      "er": [1, -1, 2],
+      "a": [-1, 1, 1],
+      "vo": [3, 2, 2],
+      "u": [5, -1, 1],
+      "rite": [6, 4, 4]
+    }, "ops": [[" ", "f"], ["-", "er"], ["+", "a"], [" ", "vo"], ["-", "u"], [" ", "rite"]]
+  }], ["fervourite", "favorite", {
+    "dict": {
+      "f": [0, 0, 1],
+      "a": [1, -1, 1],
+      "er": [-1, 1, 2],
+      "vo": [2, 3, 2],
+      "u": [-1, 5, 1],
+      "rite": [4, 6, 4]
+    }, "ops": [[" ", "f"], ["-", "a"], ["+", "er"], [" ", "vo"], ["+", "u"], [" ", "rite"]]
+  }], ["3a3a", "a", {
+    "dict": {"3a3": [-1, 0, 3], "a": [0, 3, 1]},
+    "ops": [["+", "3a3"], [" ", "a"]]
+  }], ["aaazced", "abcdef", {
+    "dict": {
+      "a": [0, 0, 1],
+      "b": [1, -1, 1],
+      "aaz": [-1, 1, 3],
+      "c": [2, 4, 1],
+      "d": [3, 6, 1],
+      "e": [4, 5, 1],
+      "f": [5, -1, 1]
+    }, "ops": [[" ", "a"], ["-", "b"], ["+", "aaz"], [" ", "c"], ["-", "d"], [" ", "e"], ["-", "f"], ["+", "d"]]
+  }], ["abcdef", "aaazced", {
+    "dict": {
+      "a": [0, 0, 1],
+      "aaz": [1, -1, 3],
+      "b": [-1, 1, 1],
+      "c": [4, 2, 1],
+      "e": [5, 4, 1],
+      "d": [6, 3, 1],
+      "ef": [-1, 4, 2]
+    }, "ops": [[" ", "a"], ["-", "aaz"], ["+", "b"], [" ", "c"], ["-", "e"], [" ", "d"], ["+", "ef"]]
+  }], ["abcabcdef", "abcdef", {
+    "dict": {"abc": [0, 0, 3], "def": [3, 6, 3]},
+    "ops": [[" ", "abc"], ["+", "abc"], [" ", "def"]]
+  }], ["abcdef", "abcabcdef", {
+    "dict": {"abc": [0, 0, 3], "def": [6, 3, 3]},
+    "ops": [[" ", "abc"], ["-", "abc"], [" ", "def"]]
+  }], ["abc_abc_ef", "abc_def", {
+    "dict": {"abc_": [0, 0, 4], "d": [4, -1, 1], "ef": [5, 8, 2]},
+    "ops": [[" ", "abc_"], ["-", "d"], ["+", "abc_"], [" ", "ef"]]
+  }], ["1abcde2", "abcde", {
+    "dict": {"1": [-1, 0, 1], "2": [-1, 6, 1], "abcde": [0, 1, 5]},
+    "ops": [["+", "1"], [" ", "abcde"], ["+", "2"]]
+  }], ["123abcde456", "abcde", {
+    "dict": {"123": [-1, 0, 3], "456": [-1, 8, 3], "abcde": [0, 3, 5]},
+    "ops": [["+", "123"], [" ", "abcde"], ["+", "456"]]
+  }], ["English is my favorite subject at school.", "Inglesh iz my fervourite sabject at skool.", {
+    "dict": {
+      "I": [0, -1, 1],
+      "E": [-1, 0, 1],
+      "ngl": [1, 1, 3],
+      "e": [4, 21, 1],
+      "i": [8, 4, 1],
+      "sh i": [5, 5, 4],
+      "z": [9, -1, 1],
+      "s": [5, 9, 1],
+      " my f": [10, 10, 5],
+      "er": [15, -1, 2],
+      "a": [26, 15, 1],
+      "vo": [17, 16, 2],
+      "u": [19, 24, 1],
+      "rite s": [20, 18, 6],
+      "bject at s": [27, 25, 10],
+      "k": [37, -1, 1],
+      "ch": [-1, 35, 2],
+      "ool.": [38, 37, 4]
+    },
+    "ops": [["-", "I"], ["+", "E"], [" ", "ngl"], ["-", "e"], ["+", "i"], [" ", "sh i"], ["-", "z"], ["+", "s"], [" ", " my f"], ["-", "er"], ["+", "a"], [" ", "vo"], ["-", "u"], [" ", "rite s"], ["-", "a"], ["+", "u"], [" ", "bject at s"], ["-", "k"], ["+", "ch"], [" ", "ool."]]
+  }], ["ivar--0abcdefghijklmnopqrstuvwxyz_1abcdefghijklmnopqrstuvwxyz_2abcdefghijklmnopqrstuvwxyz_3abcdefghijklmnopqrstuvwxyz_4abcdefghijklmnopqrstuvwxyz_5abcdefghijklmnopqrstuvwxyz_6abcdefghijklmnopqrstuvwxyz_7abcdefghijklmnopqrstuvwxyz_8abcdefghijklmnopqrstuvwxyz_9abcdefghijklmnopqrstuvwxyz--max", "0abcdefghijklmnopqrstuvwxyz_1abcdefghijklmnopqrstuvwxyz_2abcdefghijklmnopqrstuvwxyz_3abcdefghijklmnopqrstuvwxyz_4abcdefghijklmnopqrstuvwxyz_5abcdefghijklmnopqrstuvwxyz_6abcdefghijklmnopqrstuvwxyz_7abcdefghijklmnopqrstuvwxyz_8abcdefghijklmnopqrstuvwxyz_9abcdefghijklmnopqrstuvwxyz", {
+    "dict": {
+      "ivar--": [-1, 0, 6],
+      "0abcdefghijklmnopqrstuvwxyz_1abcdefghijklmnopqrstuvwxyz_2abcdefghijklmnopqrstuvwxyz_3abcdefghijklmnopqrstuvwxyz_4abcdefghijklmnopqrstuvwxyz_5abcdefghijklmnopqrstuvwxyz_6abcdefghijklmnopqrstuvwxyz_7abcdefghijklmnopqrstuvwxyz_8abcdefghijklmnopqrstuvwxyz_9abcdefghijklmnopqrstuvwxyz": [0, 6, 279],
+      "--max": [-1, 285, 5]
+    },
+    "ops": [["+", "ivar--"], [" ", "0abcdefghijklmnopqrstuvwxyz_1abcdefghijklmnopqrstuvwxyz_2abcdefghijklmnopqrstuvwxyz_3abcdefghijklmnopqrstuvwxyz_4abcdefghijklmnopqrstuvwxyz_5abcdefghijklmnopqrstuvwxyz_6abcdefghijklmnopqrstuvwxyz_7abcdefghijklmnopqrstuvwxyz_8abcdefghijklmnopqrstuvwxyz_9abcdefghijklmnopqrstuvwxyz"], ["+", "--max"]]
+  }]];
 
 export const testsMyers = [
   ["zc", "cd", [[-1, 0, "+", 1, "z"], [0, 1, " ", 1, "c"], [1, -1, "-", 1, "d"]]],

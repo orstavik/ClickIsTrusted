@@ -14,7 +14,7 @@ hello sunshine
   function test(tar, ref, diffExpect) {
     let editOps = myersDiff(tar, ref);
 
-    let diff = makeDictDiff(editOps, tar, ref, 0);
+    let diff = makeDictDiff(editOps, tar, ref);
     let tar2 = convert(diff);
 
     let inverse = inverseDiff(diff);
