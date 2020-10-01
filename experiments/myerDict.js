@@ -1,3 +1,16 @@
+
+//todo
+// 0. we only try to find partials in the x dimension.
+//    thus there will be no difference between deleting a redundant passage, and deleting something unique..
+//    we want to show the difference here.
+// 1. we only search for partials from the head of the loose insert/delete.
+//    we should search for partials both from head and tail.
+// 2. when we find remove a partial from a loose end, both from the head or tail,
+//    the remaining partial might be still contain another partial copied into the head/tail position from another part of the document.
+//    This means that the search for partials should be recursive. we might find a new partial head
+//    IN THE SAME loose insert delete text
+//    AFTER we have just found and removed a previous head on the same loose insert/delete.
+//    Applies equally to tail searches.
 function findPartialCopiesRedactsHead({dict, ops, ref, tar}, minPartialLength = 16) {
   for (let [key, coord] of Object.entries(dict)) {
     if (coord[0] === -1) {
@@ -27,7 +40,6 @@ function findPartialCopiesRedactsHead({dict, ops, ref, tar}, minPartialLength = 
   }
 }
 
-//
 export function makeDictDiff(rawOps, tar, ref, minPartialLength) {
   const dict = {};
   const ops = [];
@@ -45,8 +57,6 @@ export function makeDictDiff(rawOps, tar, ref, minPartialLength) {
   const diff = {ref, tar, dict, ops};
   findCopyExtraAndRedactRedundant(diff);
   findPartialCopiesRedactsHead(diff, minPartialLength);
-  // diff = enhanceDiff(diff, minPartialLength);
-  //todo here we need to enhance further, ie. search for partial copies of at both the head and tail of words not yet matched on both sides.
   return diff;
 }
 
