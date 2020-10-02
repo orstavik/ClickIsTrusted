@@ -1,4 +1,8 @@
 export const testDictionary = [
+  ["hello", "world", {
+    "dict": {"world": [0, -1, 5], "hello": [-1, 0, 5]},
+    "ops": [["-", "world"], ["+", "hello"]]
+  }],
   ["abcdefghijklmnopqrstuvwxyz_abcdefghijklmnopqrstXXXuvw", "abcdefghijklmnopqrstuvwxyz_", {
     "dict": {"abcdefghijklmnopqrstuvwxyz_": [0, 0, 27], "abcdefghijklmnopqrst": [0, 27, 20], "XXXuvw": [-1, 47, 6]},
     "ops": [[" ", "abcdefghijklmnopqrstuvwxyz_"], ["+", "abcdefghijklmnopqrst"], ["+", "XXXuvw"]]

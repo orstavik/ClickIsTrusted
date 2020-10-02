@@ -68,8 +68,8 @@ function getS(op, tar, ref) {
   return op[2] === '+' ? tar.substr(op[1], op[3]) : ref.substr(op[0], op[3]);
 }
 
-//adds strings to the list of operations
-function manInTheMiddleShouldBeLast(ops) {
+//moves matches to the end if possible,
+function matchInTheMiddleStandBack(ops) {
   const res = [];
   for (let i = 0; i < ops.length; i++) {
     const [oneIndex, oneIndex2, oneOp, oneLength, oneStr] = ops[i];
@@ -86,12 +86,35 @@ function manInTheMiddleShouldBeLast(ops) {
   return res;
 }
 
+//changes insignificant matches in between two identical operations
+function matchInTheMiddleTooSmall(ops) {
+  const res = [];
+  for (let i = 0; i < ops.length; i++) {
+    const [oneIndex, oneIndex2, oneOp, oneLength, oneStr] = ops[i];
+    const [twoIndex, twoIndex2, twoOp, twoLength, twoStr] = ops[i + 1] || [];
+    const [threeIndex, threeIndex2, threeOp, threeLength, threeStr] = ops[i + 2] || [];
+    const [fourIndex, fourIndex2, fourOp, fourLength, fourStr] = ops[i + 3] || [];
+    const [fiveIndex, fiveIndex2, fiveOp, fiveLength, fiveStr] = ops[i + 4] || [];
+    const totalLength = oneLength + twoLength + threeLength + fourLength + fiveLength;
+    if (oneOp === '-' && twoOp === '+' && threeOp === ' ' && fourOp === '-' && fiveOp === '+' && threeLength <= 16 && threeLength < (totalLength / 3)) {
+      res.push([oneIndex, oneIndex2, '-', oneLength + threeLength + fourLength, oneStr + threeStr + fourStr]);
+      res.push([twoIndex, twoIndex2, '+', twoLength + threeLength + fiveLength, twoStr + threeStr + fiveStr]);
+      i += 4;
+    } else {
+      res.push(ops[i]);
+    }
+  }
+  return res;
+}
+
 export function myersDiff(tar, ref) {
   const [map, d, k] = myers(ref, tar);
   const coords = makeInsertDeleteSnake(map, d, k);
-  const ops = splitMatchInSnake(coords);
+  let ops = splitMatchInSnake(coords);
   ops.forEach(op => op.push(getS(op, tar, ref)));//adding strings
-  return manInTheMiddleShouldBeLast(ops);
+  ops = matchInTheMiddleStandBack(ops);
+  ops = matchInTheMiddleTooSmall(ops);
+  return ops;
 }
 
 //working function, but should be employed from the diffDictionary, and not directly on a list of ops.
