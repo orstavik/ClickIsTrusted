@@ -6,6 +6,27 @@
 </head>
 <body>
 <script type="module">
+  const googleKey = {
+    "keys": [
+      {
+        "kid": "7da7863e8637d669bc2a12622cede2a8813d11b1",
+        "e": "AQAB",
+        "alg": "RS256",
+        "use": "sig",
+        "n": "pnY4f3x0zKSW62RDzpA10AcNfowL07LMVjlRUVmNzqNsv79QuhWBlRefBT0UxbhGzZBwF8XoLBDe-54QXlNsQ8VtIrr8oPnuUR_3ZKGpGiT95HRf_hLoWu7CsyJMF4MOJsa7k4kE6X-4v7KG0hTNe0IMafXI62uU1DoBHyigHUBgZdMv6Do7VDSP-ijGFcp2fPS07aKFaltopM1r-M7FW_pHP4tTtS6_eKLohG1NOSZwPgHKGQai5kc5gwZneNBdJsgRjMHF-NIA9H_vFUoMEQL1JgcbZmSAuhfdhJBKOQGv4pkkbz7Uc9bbIpwdJzgLC1S9hXfbnt-39dZPGN0yHQ",
+        "kty": "RSA"
+      },
+      {
+        "alg": "RS256",
+        "kty": "RSA",
+        "e": "AQAB",
+        "n": "sHJFsAxMN16bLYQPHB_yTRbKYP3EwH4XYMCsZHljxY1lx8G-K-jfzoZSnU7EsFdsl6hwpbeKdC0zxt4nTC7XAAqCkgscEZ8KJrrxyDuxNMhu3aLvc8e4cNBrXl1ijSxJpsE6AvUABjnSIgDZXR0Mtmfqe3p0ATfEJl6EsZ6Rm-_gqzB7IRliixEg-LLpbYN0NKZ9q4LuwYcUT1Ca5lxlVZLXF4p7ZybXelwR5lB4RMaPJ4RLBtSkagWEMNdjOrVKYHjS6zOgortInRjy4xiCNENyQenhWEWY3kn6d0S2qQyMkNH_ReuMLpUX_-VWy_Yl-PPbih5CO2gK2_Ot-sEz1w",
+        "kid": "178ab1dc5913d929d37c23dcaa961872f8d70b68",
+        "use": "sig"
+      }
+    ]
+  };
+
   const privateKey = {
     p: "5bxZBZejvyAK5_vtFMDI2vqmf2zBitAM-Y1tfpDZDIM5Q7jWSlFnhibcfkfK7fg_P4DC87gSkZtYRE5X5JttrG58CNsm8Vvj6DxLBhC_zbtxizhtlhbsV2euTxibeSSG45CjFWqlqXJqbPzhbQBxvwEL1gVu4_-AMU55gTcaHj0",
     kty: "RSA",
@@ -61,80 +82,82 @@
   // Binary String to URL-Safe Base64
   //
   // btoa (Binary-to-Ascii) means "binary string" to base64
-  function binToUrlBase64(bin) {
-    return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+/g, '');
-  }
-
   // Uint8Array to URL Safe Base64
   //
   // the shortest distant between two encodings... binary string
   function arrayBufferUint8ToUrlBase64(buffer) {
-    const uint8 = new Uint8Array(buffer);
-    var bin = '';
-    uint8.forEach(function (code) {
-      bin += String.fromCharCode(code);
+    const one = new Uint8Array(buffer);
+    // console.log("1: ", one);
+    var two = '';
+    one.forEach(function (code) {
+      two += String.fromCharCode(code);
     });
-    return binToUrlBase64(bin);
+    // console.log("2: ", two);
+    const three = btoa(two);
+    // console.log("3: ", three);
+    const four = three.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+/g, '');
+    // console.log("4: ", four);
+    return four;
+  }
+
+  function arrayBufferUint8ToUrlBase64_r(four) {
+    // console.log("4_ ", four);
+    let three = four.replace(/-/g, '+').replace(/_/g, '/');
+    const pad = three.length % 4;
+    if (pad === 2)
+      three += '==';
+    else if (pad === 3)
+      three += '=';
+    // console.log("3_ ", three);
+    const two = atob(three);
+    // console.log("2_ ", two);
+    const one = new Uint8Array(two.length);
+    for (let i = 0; i < two.length; i++)
+      one[i] = two.charCodeAt(i);
+    // console.log("1_ ", one);
+    return one;
+  }
+
+  function base64urlToBin(base64url) {
+    const str = base64url.replace(/\-/g, '+').replace(/_/g, '/');
+    const pad = str % 4;
+    if (pad === 2)
+      return str + '==';
+    else if (pad === 3)
+      return str + '=';
+    return atob(str);
+  }
+
+  function base64urlToarrayBufferUint8(base64url) {
+    const bin = base64urlToBin(base64url);
+    return new TextEncoder().encode(bin);
   }
 
   const headerPayloadBase64url = toBase64url(header) + '.' + toBase64url(payload);
   (async function () {
-    const privKey = await crypto.subtle.importKey('jwk', privateKey, {name: 'RSASSA-PKCS1-v1_5', hash: 'sha-256'}, true, ['sign']);
-    const pubKey = await crypto.subtle.importKey('jwk', publicKey, {name: 'RSASSA-PKCS1-v1_5', hash: 'sha-256'}, false, ['verify']);
+    const privKey = await crypto.subtle.importKey('jwk', privateKey, {
+      name: 'RSASSA-PKCS1-v1_5',
+      hash: 'sha-256'
+    }, true, ['sign']);
+    const pubKey = await crypto.subtle.importKey('jwk', publicKey, {
+      name: 'RSASSA-PKCS1-v1_5',
+      hash: 'sha-256'
+    }, false, ['verify']);
 
-    const signature = await crypto.subtle.sign({name: 'RSASSA-PKCS1-v1_5', hash: 'sha-256'}, privKey, new TextEncoder().encode(headerPayloadBase64url));
+    const signature = await crypto.subtle.sign({
+      name: 'RSASSA-PKCS1-v1_5',
+      hash: 'sha-256'
+    }, privKey, new TextEncoder().encode(headerPayloadBase64url));
     const sig = arrayBufferUint8ToUrlBase64(signature);
     console.log(sig);
-    const verify = await crypto.subtle.verify({name: 'RSASSA-PKCS1-v1_5', hash: 'sha-256'},pubKey, signature, new TextEncoder().encode(headerPayloadBase64url));
+    const signature2 = arrayBufferUint8ToUrlBase64_r(sig);
+
+    const verify = await crypto.subtle.verify({
+      name: 'RSASSA-PKCS1-v1_5',
+      hash: 'sha-256'
+    }, pubKey, signature2, new TextEncoder().encode(headerPayloadBase64url));
     console.log(verify);
   })();
-
-  const headerPayloadBase64urlTst = 'eyJhbGciOiJSUzI1NiIsImtpZCI6IjdkYTc4NjNlODYzN2Q2NjliYzJhMTI2MjJjZWRlMmE4ODEzZDExYjEiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJhY2NvdW50cy5nb29nbGUuY29tIiwiYXpwIjoiNTk1NTY0MDcyMDUwLTV0NGkxNGdlM2cwYjdrbnJobjhhbjlwdWpoYTUzbTZxLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwiYXVkIjoiNTk1NTY0MDcyMDUwLTV0NGkxNGdlM2cwYjdrbnJobjhhbjlwdWpoYTUzbTZxLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwic3ViIjoiMTA5MTcxMzczODI2MDUxNTgyNTk4IiwiZW1haWwiOiJpbnRlcnRleHQubm9AZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImF0X2hhc2giOiJqYW1LVU9ZNG1BMlcyczBfQUt2RXJBIiwibmFtZSI6ImludGVydGV4dCBubyIsInBpY3R1cmUiOiJodHRwczovL2xoNi5nb29nbGV1c2VyY29udGVudC5jb20vLWxBS0NTUGlBMHZjL0FBQUFBQUFBQUFJL0FBQUFBQUFBQUFBL0FNWnV1Y21KaGxGRjRwRkpPV1F6SnJ0aHp3R2lNWG9wYWcvczk2LWMvcGhvdG8uanBnIiwiZ2l2ZW5fbmFtZSI6ImludGVydGV4dCIsImZhbWlseV9uYW1lIjoibm8iLCJsb2NhbGUiOiJubyIsImlhdCI6MTYwMjc1OTczNiwiZXhwIjoxNjAyNzYzMzM2LCJqdGkiOiIzMzI4NjcyZjA3MWNkZjVmYTQwMjU3ZmU4ZTUxNTk3ZDUxM2ZkNGMzIn0';
-  console.log(headerPayloadBase64url === headerPayloadBase64urlTst);
-
-
-  // const text = 'An obscure body in the S-K System, your majesty. The inhabitants refer to it as the planet Earth.';
-  //
-  // async function digestMessage(message) {
-  //   const encoder = new TextEncoder();
-  //   const data = encoder.encode(message);
-  //   const hash = await crypto.subtle.digest('SHA-256', data);
-  //   return hash;
-  // }
-  //
-  // const digestBuffer = await digestMessage(text);
-  // console.log(digestBuffer.byteLength);
-  //
-  // const text = 'An obscure body in the S-K System, your majesty. The inhabitants refer to it as the planet Earth.';
-  //
-  // async function digestMessage(message) {
-  //   const msgUint8 = new TextEncoder().encode(message);                           // encode as (utf-8) Uint8Array
-  //   const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);           // hash the message
-  //   const hashArray = Array.from(new Uint8Array(hashBuffer));                     // convert buffer to byte array
-  //   const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join(''); // convert bytes to hex string
-  //   return hashHex;
-  // }
-  //
-  // const digestHex = await digestMessage(text);
-  // console.log(digestHex);
-
-
-  async function verify(jwsObject, jwKey) {
-    const jwsSigningInput = jwsObject.split('.').slice(0, 2).join('.')
-    const jwsSignature = jwsObject.split('.')[2]
-    const key = await window.crypto.subtle.importKey('jwk', jwKey, {
-      name: 'RSASSA-PKCS1-v1_5',
-      hash: {name: 'SHA-256'}
-    }, false, ['verify']);
-    const isValid = window.crypto.subtle.verify(
-      {name: 'RSASSA-PKCS1-v1_5'},
-      key,
-      base64url.parse(jwsSignature, {loose: true}),
-      new TextEncoder().encode(jwsSigningInput)
-    );
-    return isValid;
-  }
-
 </script>
 </body>
 </html>
