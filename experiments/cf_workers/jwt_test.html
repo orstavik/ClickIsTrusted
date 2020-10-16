@@ -101,17 +101,17 @@
     return data + '.' + Uint8ToBase64url(new Uint8Array(signature));
   }
 
-  async function verifyAndExtract(jwt, pubKey) {
-    const [head, pay, signature] = jwt.split('.');
-    const signature2 = base64urlToUint8Array(signature);
+  async function verifyAndExtract(jwt, pubKeys) {
+    const [h64, p64, s64] = jwt.split('.');
+    const header = JSON.parse(base64urlToString(h64));
 
     const verify = await crypto.subtle.verify({
       name: 'RSASSA-PKCS1-v1_5',
       hash: 'sha-256'
-    }, pubKey, signature2, new TextEncoder().encode(head + "." + pay));
+    }, pubKeys[header.kid], base64urlToUint8Array(s64), new TextEncoder().encode(h64 + "." + p64));
     if (!verify)
       throw 'hackkkkk!';
-    return {header: JSON.parse(base64urlToString(head)), payload: JSON.parse(base64urlToString(pay))};
+    return {header, payload: JSON.parse(base64urlToString(p64))};
   }
 
   (async function () {
@@ -123,11 +123,12 @@
     const jwt = await signJwt(rawJWTobj, privKey);
     console.log(jwt);
 
-    const pubKey = await crypto.subtle.importKey('jwk', publicKey, {
+    const keys = {};
+    keys[publicKey.kid] = await crypto.subtle.importKey('jwk', publicKey, {
       name: 'RSASSA-PKCS1-v1_5',
       hash: 'sha-256'
     }, false, ['verify']);
-    const verify = await verifyAndExtract(jwt, pubKey);
+    const verify = await verifyAndExtract(jwt, keys);
     console.log(verify);
   })();
 </script>
