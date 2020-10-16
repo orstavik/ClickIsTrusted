@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+hello
+<script type="module">
+  (async function () {
+
+    // String (UCS-2) to Uint8Array
+    //
+    // because... JavaScript, Strings, and Buffers
+    function strToUint8(str) {
+      return new TextEncoder().encode(str);
+    }
+
+    // Same thing, without TextEncoder:
+    // function strToUint8(str) {
+    //   return new Uint8Array.from(
+    //     utf8ToBinaryString(str)
+    //       .split('')
+    //       .forEach(function(ch) {
+    //         return ch.charCodeAt(0);
+    //       })
+    //   );
+    // }
+    // UCS-2 String to URL-Safe Base64
+    //
+    // btoa doesn't work on UTF-8 strings
+    function strToUrlBase64(str) {
+      return binToUrlBase64(utf8ToBinaryString(str));
+    }
+
+    // Binary String to URL-Safe Base64
+    //
+    // btoa (Binary-to-Ascii) means "binary string" to base64
+    function binToUrlBase64(bin) {
+      return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+/g, '');
+    }
+
+    // UTF-8 to Binary String
+    //
+    // Because JavaScript has a strange relationship with strings
+    // https://coolaj86.com/articles/base64-unicode-utf-8-javascript-and-you/
+    function utf8ToBinaryString(str) {
+      // replaces any uri escape sequence, such as %0A,
+      // with binary escape, such as 0x0A
+      return encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode(parseInt(p1, 16)));
+    }
+
+    // Uint8Array to URL Safe Base64
+    //
+    // the shortest distant between two encodings... binary string
+    function uint8ToUrlBase64(uint8) {
+      var bin = '';
+      uint8.forEach(function (code) {
+        bin += String.fromCharCode(code);
+      });
+      return binToUrlBase64(bin);
+    }
+
+    async function JWTsign(jwk, headers, claims) {
+      // Make a shallow copy of the key
+      // (to set ext if it wasn't already set)
+      jwk = Object.assign({}, jwk);
+
+      // The headers should probably be empty
+      headers.typ = 'JWT';
+      headers.alg = 'ES256';
+      if (!headers.kid) {
+        // alternate: see thumbprint function below
+        headers.jwk = {crv: jwk.crv, kty: jwk.kty, x: jwk.x, y: jwk.y};
+      }
+
+      var jws = {
+        // JWT "headers" really means JWS "protected headers"
+        protected: strToUrlBase64(JSON.stringify(headers)),
+
+        // JWT "claims" are really a JSON-defined JWS "payload"
+        payload: strToUrlBase64(JSON.stringify(claims))
+      };
+
+      // To import as EC (ECDSA, P-256, SHA-256, ES256)
+      var keyType = {
+        name: 'ECDSA',
+        namedCurve: 'P-256',
+        hash: {name: 'SHA-256'}
+      };
+
+      // To make re-exportable as JSON (or DER/PEM)
+      var exportable = true;
+
+      // Import as a private key that isn't black-listed from signing
+      var privileges = ['sign'];
+
+      // Actually do the import, which comes out as an abstract key type
+      const privkey = await window.crypto.subtle.importKey('jwk', jwk, keyType, exportable, privileges);
+      // Convert UTF-8 to Uint8Array ArrayBuffer
+      var data = strToUint8(jws.protected + '.' + jws.payload);
+
+      // The signature and hash should match the bit-entropy of the key
+      // https://tools.ietf.org/html/rfc7518#section-3
+      var sigType = {name: 'ECDSA', hash: {name: 'SHA-256'}};
+
+      const signature = await window.crypto.subtle.sign(sigType, privkey, data);
+      // returns an ArrayBuffer containing a JOSE (not X509) signature,
+      // which must be converted to Uint8 to be useful
+      jws.signature = uint8ToUrlBase64(new Uint8Array(signature));
+
+      // JWT is just a "compressed", "protected" JWS
+      return jws.protected + '.' + jws.payload + '.' + jws.signature;
+    }
+
+    async function ECgenerate() {
+      var keyType = {
+        name: 'ECDSA',
+        namedCurve: 'P-256'
+      };
+      var exportable = true;
+      var privileges = ['sign', 'verify'];
+      const key = await window.crypto.subtle.generateKey(keyType, exportable, privileges);
+      // returns an abstract and opaque WebCrypto object,
+      // which in most cases you'll want to export as JSON to be able to save
+      return await window.crypto.subtle.exportKey('jwk', key.privateKey);
+    }
+
+    // Create a Public Key from a Private Key
+    //
+    // chops off the private parts
+    function ECneuter(jwk) {
+      var copy = Object.assign({}, jwk);
+      delete copy.d;
+      copy.key_ops = ['verify'];
+      return copy;
+    }
+
+    async function JWKthumbprint(jwk) {
+      // lexigraphically sorted, no spaces
+      // The hash should match the size of the key,
+      // but we're only dealing with P-256
+      var sortedPub = JSON.stringify({'crv': jwk.crv, "kty": "EC", 'x': jwk.x, 'y': jwk.y,}, null, 0);
+      const hash = await window.crypto.subtle.digest({name: 'SHA-256'}, strToUint8(sortedPub));
+      return uint8ToUrlBase64(new Uint8Array(hash));
+    }
+
+    var claims = {
+      iss: 'https://example.com/',
+      sub: 'xxx',
+      // azp: 'https://cool.io/',
+      // jti: 'YNiXjHAmoehN8TsIgkvr1g',  // An arbitrary (probably random) id for the token
+      aud: 'https://example.com/',
+      exp: Math.round(Date.now() / 1000) + 15 * 60
+    };
+
+    const jwkInstance = await ECgenerate();
+    console.info('Private Key:', JSON.stringify(jwkInstance));
+    console.info('Public Key:', JSON.stringify(ECneuter(jwkInstance)));
+
+    const kid = await JWKthumbprint(jwkInstance);
+    const jwtString = await JWTsign(jwkInstance, {kid: kid}, claims);
+    console.info('JWT:', jwtString);
+  })();
+
+</script>
+</body>
+</html>
