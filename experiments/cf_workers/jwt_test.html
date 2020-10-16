@@ -79,17 +79,8 @@
     "jti": "3328672f071cdf5fa40257fe8e51597d513fd4c3"
   };
 
-  // Binary String to URL-Safe Base64
-  //
-  // btoa (Binary-to-Ascii) means "binary string" to base64
-  // Uint8Array to URL Safe Base64
-  //
-  // the shortest distant between two encodings... binary string
   function Uint8ToBase64url(one) {
-    let two = '';
-    one.forEach(function (code) {
-      two += String.fromCharCode(code);
-    });
+    const two = String.fromCharCode.apply(null, new Uint16Array(one));
     // console.log("2: ", two);
     const three = btoa(two);
     // console.log("3: ", three);
@@ -138,6 +129,7 @@
       hash: 'sha-256'
     }, pubKey, signature2, new TextEncoder().encode(headerPayloadBase64url));
     console.log(verify);
+    //todo convert the base64url header and payload to json objects
   })();
 </script>
 </body>
