@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+<script type="module">
+  const privateKey = {
+    p: "5bxZBZejvyAK5_vtFMDI2vqmf2zBitAM-Y1tfpDZDIM5Q7jWSlFnhibcfkfK7fg_P4DC87gSkZtYRE5X5JttrG58CNsm8Vvj6DxLBhC_zbtxizhtlhbsV2euTxibeSSG45CjFWqlqXJqbPzhbQBxvwEL1gVu4_-AMU55gTcaHj0",
+    kty: "RSA",
+    q: "1ENQWNGAf3xBQM2UhUKsy7mHKYFiy3_dWS5JelId1hTdwm9g5sWMP8qsZNdtpfbG0nU7inpAO7vvt3CsAe7bgJR9io511gA32mhtOiswBQdoBDSYd_gJAJHWyp-_5WQP38XaJluuf0gLfxfFugFBs_MEwcByX5dlexMoFLUCSzE",
+    d: "NSbh_h5YPtVy2EvVn2J2fZ-Mdx0fbSyBdavnV_2tQKjpV0BIC0K5IaRG7RxpcF5WzTp3RGr2b7qiIF2pm6tXe4dLgkvcOApX9ppaA2ESze8WEPG3BBcXlylU_FYPOZSQ9yTNpzmRxrLc0grJJvjvmBSrjqUtLCvJE15GWW5lhDJPXtadlBgxa7xkeQklddTmbZKhXnjEM4WhCQzUakAKMmK-iLOf2MKdV1Ht5Q6qTuEuxr8Eh6E2yMjnTWU11FIv0vcTtIHXUuHIoxYQsdtUrRc4uvY5Hfn1cjSJ7j8pY9666ac-BBn3bB_GvtXJqc9h0pWhTlNz9i_Xm6vj6JwswQ",
+    e: "AQAB",
+    use: "sig",
+    kid: "8zaYXypVQPODbgom3580DpqYr8MPR5YPd-gcdfRdMzo",
+    qi: "GqS1-jQkNIP1NWfYipa_tNpIyoJxqrI15adfSDsuBNUdOc-nTNBXEJZcPLL8xaAdqp7BENgORbsRFXQUFWg4DM_Gvs-6so5LNjI0Fr2ITnaSCYo9T5B9bMFYmLMZ72xfuj80sVl-OD5_5EWGWh-J4SZvqe8fo9bDR6XWvRUIZp8",
+    dp: "aLUVpfTdTwkdr2olPmY3pYbESCObetckcsFA_ISsSIWune0qziiYFI61xGCYXyncOedH86kb3X1-F3PVn34v2H1qzuaDs1H8aCbC0vrjULN0Js4LNHMyOQwqaCaBBg_d4u5TRjmbU8WwOAhx_ipLrZCegmdriUM0fESWIIyqvMk",
+    alg: "RS256",
+    dq: "X3EVA5rQCIK6ZIULrw_X2pLFb6g53_7SbHMfntylhclEHVUvYRSah2R-N6mWJ_XaWG9WImHt1-4dT4JeFVBtaldaS57a5Sqb8pzZ4DnjEZ_O6XUsyWTBx3vL9Lf39REVAi1Ydb7rq1eds7vgsE44WM2A6g26X7kXbEukzgrFyUE",
+    n: "vnxiHn6cuLLf-w3Js200XxwgESgy4Gc81AUqdSFLBoMH4juZEqS3yMBpEWtk5t5gcnlEM5qE42o8i7UMhQ9YVPwjBRKj0KnHtY7Br8XZxM-FeyVyYhtLKg1NFoLUItOd5A4Cmq2hOvyel_CW_XB9cgaTEGcyvL-GJAY9Vu4qHgvT6bYAcfxaxos951U0JHJAyJqOspBkF1tffvFwSQmfQDQK-p99-kZTqypa12LKPlXDAWaCbu-DTNVjfz4ufRIs_FobwdPuuJ2Nbm1ou3CxEkdhSaXBvRRF_P3Q3cN5kOuGJ0z5aQLVB45Vq3jH1fDQyc7hRGZQj72s4Oc5kFWorQ"
+  };
+
+  const publicKey = {
+    kty: "RSA",
+    e: "AQAB",
+    use: "sig",
+    kid: "8zaYXypVQPODbgom3580DpqYr8MPR5YPd-gcdfRdMzo",
+    alg: "RS256",
+    n: "vnxiHn6cuLLf-w3Js200XxwgESgy4Gc81AUqdSFLBoMH4juZEqS3yMBpEWtk5t5gcnlEM5qE42o8i7UMhQ9YVPwjBRKj0KnHtY7Br8XZxM-FeyVyYhtLKg1NFoLUItOd5A4Cmq2hOvyel_CW_XB9cgaTEGcyvL-GJAY9Vu4qHgvT6bYAcfxaxos951U0JHJAyJqOspBkF1tffvFwSQmfQDQK-p99-kZTqypa12LKPlXDAWaCbu-DTNVjfz4ufRIs_FobwdPuuJ2Nbm1ou3CxEkdhSaXBvRRF_P3Q3cN5kOuGJ0z5aQLVB45Vq3jH1fDQyc7hRGZQj72s4Oc5kFWorQ"
+  }
+
+  function toBase64url(obj) {
+    return btoa(JSON.stringify(obj)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+  }
+
+  const header = {
+    typ: "JWT",
+    alg: publicKey.alg,
+    kid: publicKey.kid,//todo is this the wrong kid??
+  };
+
+  const payload = {
+    "iss": "accounts.google.com",
+    "azp": "595564072050-5t4i14ge3g0b7knrhn8an9pujha53m6q.apps.googleusercontent.com",
+    "aud": "595564072050-5t4i14ge3g0b7knrhn8an9pujha53m6q.apps.googleusercontent.com",
+    "sub": "109171373826051582598",
+    "email": "intertext.no@gmail.com",
+    "email_verified": true,
+    "at_hash": "jamKUOY4mA2W2s0_AKvErA",
+    "name": "intertext no",
+    "picture": "https://lh6.googleusercontent.com/-lAKCSPiA0vc/AAAAAAAAAAI/AAAAAAAAAAA/AMZuucmJhlFF4pFJOWQzJrthzwGiMXopag/s96-c/photo.jpg",
+    "given_name": "intertext",
+    "family_name": "no",
+    "locale": "no",
+    "iat": 1602759736,
+    "exp": 1602763336,
+    "jti": "3328672f071cdf5fa40257fe8e51597d513fd4c3"
+  };
+
+  // Binary String to URL-Safe Base64
+  //
+  // btoa (Binary-to-Ascii) means "binary string" to base64
+  function binToUrlBase64(bin) {
+    return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+/g, '');
+  }
+
+  // Uint8Array to URL Safe Base64
+  //
+  // the shortest distant between two encodings... binary string
+  function arrayBufferUint8ToUrlBase64(buffer) {
+    const uint8 = new Uint8Array(buffer);
+    var bin = '';
+    uint8.forEach(function (code) {
+      bin += String.fromCharCode(code);
+    });
+    return binToUrlBase64(bin);
+  }
+
+  const headerPayloadBase64url = toBase64url(header) + '.' + toBase64url(payload);
+  (async function () {
+    const privKey = await crypto.subtle.importKey('jwk', privateKey, {name: 'RSASSA-PKCS1-v1_5', hash: 'sha-256'}, true, ['sign']);
+    const pubKey = await crypto.subtle.importKey('jwk', publicKey, {name: 'RSASSA-PKCS1-v1_5', hash: 'sha-256'}, false, ['verify']);
+
+    const signature = await crypto.subtle.sign({name: 'RSASSA-PKCS1-v1_5', hash: 'sha-256'}, privKey, new TextEncoder().encode(headerPayloadBase64url));
+    const sig = arrayBufferUint8ToUrlBase64(signature);
+    console.log(sig);
+    const verify = await crypto.subtle.verify({name: 'RSASSA-PKCS1-v1_5', hash: 'sha-256'},pubKey, signature, new TextEncoder().encode(headerPayloadBase64url));
+    console.log(verify);
+  })();
+
+  const headerPayloadBase64urlTst = 'eyJhbGciOiJSUzI1NiIsImtpZCI6IjdkYTc4NjNlODYzN2Q2NjliYzJhMTI2MjJjZWRlMmE4ODEzZDExYjEiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJhY2NvdW50cy5nb29nbGUuY29tIiwiYXpwIjoiNTk1NTY0MDcyMDUwLTV0NGkxNGdlM2cwYjdrbnJobjhhbjlwdWpoYTUzbTZxLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwiYXVkIjoiNTk1NTY0MDcyMDUwLTV0NGkxNGdlM2cwYjdrbnJobjhhbjlwdWpoYTUzbTZxLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwic3ViIjoiMTA5MTcxMzczODI2MDUxNTgyNTk4IiwiZW1haWwiOiJpbnRlcnRleHQubm9AZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImF0X2hhc2giOiJqYW1LVU9ZNG1BMlcyczBfQUt2RXJBIiwibmFtZSI6ImludGVydGV4dCBubyIsInBpY3R1cmUiOiJodHRwczovL2xoNi5nb29nbGV1c2VyY29udGVudC5jb20vLWxBS0NTUGlBMHZjL0FBQUFBQUFBQUFJL0FBQUFBQUFBQUFBL0FNWnV1Y21KaGxGRjRwRkpPV1F6SnJ0aHp3R2lNWG9wYWcvczk2LWMvcGhvdG8uanBnIiwiZ2l2ZW5fbmFtZSI6ImludGVydGV4dCIsImZhbWlseV9uYW1lIjoibm8iLCJsb2NhbGUiOiJubyIsImlhdCI6MTYwMjc1OTczNiwiZXhwIjoxNjAyNzYzMzM2LCJqdGkiOiIzMzI4NjcyZjA3MWNkZjVmYTQwMjU3ZmU4ZTUxNTk3ZDUxM2ZkNGMzIn0';
+  console.log(headerPayloadBase64url === headerPayloadBase64urlTst);
+
+
+  // const text = 'An obscure body in the S-K System, your majesty. The inhabitants refer to it as the planet Earth.';
+  //
+  // async function digestMessage(message) {
+  //   const encoder = new TextEncoder();
+  //   const data = encoder.encode(message);
+  //   const hash = await crypto.subtle.digest('SHA-256', data);
+  //   return hash;
+  // }
+  //
+  // const digestBuffer = await digestMessage(text);
+  // console.log(digestBuffer.byteLength);
+  //
+  // const text = 'An obscure body in the S-K System, your majesty. The inhabitants refer to it as the planet Earth.';
+  //
+  // async function digestMessage(message) {
+  //   const msgUint8 = new TextEncoder().encode(message);                           // encode as (utf-8) Uint8Array
+  //   const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);           // hash the message
+  //   const hashArray = Array.from(new Uint8Array(hashBuffer));                     // convert buffer to byte array
+  //   const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join(''); // convert bytes to hex string
+  //   return hashHex;
+  // }
+  //
+  // const digestHex = await digestMessage(text);
+  // console.log(digestHex);
+
+
+  async function verify(jwsObject, jwKey) {
+    const jwsSigningInput = jwsObject.split('.').slice(0, 2).join('.')
+    const jwsSignature = jwsObject.split('.')[2]
+    const key = await window.crypto.subtle.importKey('jwk', jwKey, {
+      name: 'RSASSA-PKCS1-v1_5',
+      hash: {name: 'SHA-256'}
+    }, false, ['verify']);
+    const isValid = window.crypto.subtle.verify(
+      {name: 'RSASSA-PKCS1-v1_5'},
+      key,
+      base64url.parse(jwsSignature, {loose: true}),
+      new TextEncoder().encode(jwsSigningInput)
+    );
+    return isValid;
+  }
+
+</script>
+</body>
+</html>
