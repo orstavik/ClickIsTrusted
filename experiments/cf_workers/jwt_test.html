@@ -51,10 +51,6 @@
     n: "vnxiHn6cuLLf-w3Js200XxwgESgy4Gc81AUqdSFLBoMH4juZEqS3yMBpEWtk5t5gcnlEM5qE42o8i7UMhQ9YVPwjBRKj0KnHtY7Br8XZxM-FeyVyYhtLKg1NFoLUItOd5A4Cmq2hOvyel_CW_XB9cgaTEGcyvL-GJAY9Vu4qHgvT6bYAcfxaxos951U0JHJAyJqOspBkF1tffvFwSQmfQDQK-p99-kZTqypa12LKPlXDAWaCbu-DTNVjfz4ufRIs_FobwdPuuJ2Nbm1ou3CxEkdhSaXBvRRF_P3Q3cN5kOuGJ0z5aQLVB45Vq3jH1fDQyc7hRGZQj72s4Oc5kFWorQ"
   }
 
-  function toBase64url(obj) {
-    return btoa(JSON.stringify(obj)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
-  }
-
   const header = {
     typ: "JWT",
     alg: publicKey.alg,
@@ -105,7 +101,45 @@
     return one;
   }
 
-  const headerPayloadBase64url = toBase64url(header) + '.' + toBase64url(payload);
+  function toBase64url(obj) {
+    return btoa(JSON.stringify(obj)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+  }
+
+  function base64urlToString(base64url) {
+    let base64 = base64url.replace(/-/g, '+').replace(/_/g, '/');
+    const pad = base64.length % 4;
+    if (pad === 2)
+      base64 += '==';
+    else if (pad === 3)
+      base64 += '=';
+    return atob(base64);
+  }
+
+  async function makeJwt(privKey, header, payload) {
+    const base64urlHeader = toBase64url(header);
+    const base64urlPayload = toBase64url(payload);
+    const data = base64urlHeader + '.' + base64urlPayload;
+
+    const signature = await crypto.subtle.sign({
+      name: 'RSASSA-PKCS1-v1_5',
+      hash: 'sha-256'
+    }, privKey, new TextEncoder().encode(data));
+    return data + '.' + Uint8ToBase64url(new Uint8Array(signature));
+  }
+
+  async function verifyAndExtract(jwt, pubKey) {
+    const [head, pay, signature] = jwt.split('.');
+    const signature2 = base64urlToUint8Array(signature);
+
+    const verify = await crypto.subtle.verify({
+      name: 'RSASSA-PKCS1-v1_5',
+      hash: 'sha-256'
+    }, pubKey, signature2, new TextEncoder().encode(head + "." + pay));
+    if(!verify)
+      throw 'hackkkkk!';
+    return {header: JSON.parse(base64urlToString(head)), payload: JSON.parse(base64urlToString(pay))};
+  }
+
   (async function () {
     const privKey = await crypto.subtle.importKey('jwk', privateKey, {
       name: 'RSASSA-PKCS1-v1_5',
@@ -116,20 +150,12 @@
       hash: 'sha-256'
     }, false, ['verify']);
 
-    const signature = await crypto.subtle.sign({
-      name: 'RSASSA-PKCS1-v1_5',
-      hash: 'sha-256'
-    }, privKey, new TextEncoder().encode(headerPayloadBase64url));
-    const sig = Uint8ToBase64url(new Uint8Array(signature));
-    console.log(sig);
-    const signature2 = base64urlToUint8Array(sig);
+    const jwt = await makeJwt(privKey, header, payload);
+    console.log(jwt);
 
-    const verify = await crypto.subtle.verify({
-      name: 'RSASSA-PKCS1-v1_5',
-      hash: 'sha-256'
-    }, pubKey, signature2, new TextEncoder().encode(headerPayloadBase64url));
+    const verify = await verifyAndExtract(jwt, pubKey);
     console.log(verify);
-    //todo convert the base64url header and payload to json objects
+
   })();
 </script>
 </body>
