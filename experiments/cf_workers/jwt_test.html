@@ -31,54 +31,47 @@
   }
 
   const rawJWTobj = {
-      header: {
-        typ: "JWT",
-        alg: publicKey.alg,
-        kid: publicKey.kid,
-      },
-      payload: {
-        iss: "accounts.google.com",
-        azp: "595564072050-5t4i14ge3g0b7knrhn8an9pujha53m6q.apps.googleusercontent.com",
-        aud: "595564072050-5t4i14ge3g0b7knrhn8an9pujha53m6q.apps.googleusercontent.com",
-        sub: "109171373826051582598",
-        email: "intertext.no@gmail.com",
-        email_verified: true,
-        at_hash: "jamKUOY4mA2W2s0_AKvErA",
-        name: "intertext no",
-        picture: "https://lh6.googleusercontent.com/-lAKCSPiA0vc/AAAAAAAAAAI/AAAAAAAAAAA/AMZuucmJhlFF4pFJOWQzJrthzwGiMXopag/s96-c/photo.jpg",
-        given_name: "intertext",
-        family_name: "no",
-        locale: "no",
-        iat: 1602759736,
-        exp: 1602763336,
-        jti: "3328672f071cdf5fa40257fe8e51597d513fd4c3"
-      }
+    header: {
+      typ: "JWT",
+      alg: publicKey.alg,
+      kid: publicKey.kid,
+    },
+    payload: {
+      iss: "accounts.google.com",
+      azp: "595564072050-5t4i14ge3g0b7knrhn8an9pujha53m6q.apps.googleusercontent.com",
+      aud: "595564072050-5t4i14ge3g0b7knrhn8an9pujha53m6q.apps.googleusercontent.com",
+      sub: "109171373826051582598",
+      email: "intertext.no@gmail.com",
+      email_verified: true,
+      at_hash: "jamKUOY4mA2W2s0_AKvErA",
+      name: "intertext no",
+      picture: "https://lh6.googleusercontent.com/-lAKCSPiA0vc/AAAAAAAAAAI/AAAAAAAAAAA/AMZuucmJhlFF4pFJOWQzJrthzwGiMXopag/s96-c/photo.jpg",
+      given_name: "intertext",
+      family_name: "no",
+      locale: "no",
+      iat: 1602759736,
+      exp: 1602763336,
+      jti: "3328672f071cdf5fa40257fe8e51597d513fd4c3"
     }
-  ;
+  };
 
   function Uint8ToBase64url(one) {
     const two = String.fromCharCode.apply(null, new Uint16Array(one));
-    // console.log("2: ", two);
     const three = btoa(two);
-    // console.log("3: ", three);
     return three.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+/g, '');
   }
 
   function base64urlToUint8Array(four) {
-    // console.log("4_ ", four);
     let three = four.replace(/-/g, '+').replace(/_/g, '/');
     const pad = three.length % 4;
     if (pad === 2)
       three += '==';
     else if (pad === 3)
       three += '=';
-    // console.log("3_ ", three);
     const two = atob(three);
-    // console.log("2_ ", two);
     const one = new Uint8Array(two.length);
     for (let i = 0; i < two.length; i++)
       one[i] = two.charCodeAt(i);
-    // console.log("1_ ", one);
     return one;
   }
 
@@ -126,17 +119,16 @@
       name: 'RSASSA-PKCS1-v1_5',
       hash: 'sha-256'
     }, true, ['sign']);
+    console.log(rawJWTobj);
+    const jwt = await signJwt(rawJWTobj, privKey);
+    console.log(jwt);
+
     const pubKey = await crypto.subtle.importKey('jwk', publicKey, {
       name: 'RSASSA-PKCS1-v1_5',
       hash: 'sha-256'
     }, false, ['verify']);
-
-    console.log(rawJWTobj);
-    const jwt = await signJwt(rawJWTobj, privKey);
-    console.log(jwt);
     const verify = await verifyAndExtract(jwt, pubKey);
     console.log(verify);
-
   })();
 </script>
 </body>
