@@ -6,27 +6,6 @@
 </head>
 <body>
 <script type="module">
-  const googleKey = {
-    "keys": [
-      {
-        "kid": "7da7863e8637d669bc2a12622cede2a8813d11b1",
-        "e": "AQAB",
-        "alg": "RS256",
-        "use": "sig",
-        "n": "pnY4f3x0zKSW62RDzpA10AcNfowL07LMVjlRUVmNzqNsv79QuhWBlRefBT0UxbhGzZBwF8XoLBDe-54QXlNsQ8VtIrr8oPnuUR_3ZKGpGiT95HRf_hLoWu7CsyJMF4MOJsa7k4kE6X-4v7KG0hTNe0IMafXI62uU1DoBHyigHUBgZdMv6Do7VDSP-ijGFcp2fPS07aKFaltopM1r-M7FW_pHP4tTtS6_eKLohG1NOSZwPgHKGQai5kc5gwZneNBdJsgRjMHF-NIA9H_vFUoMEQL1JgcbZmSAuhfdhJBKOQGv4pkkbz7Uc9bbIpwdJzgLC1S9hXfbnt-39dZPGN0yHQ",
-        "kty": "RSA"
-      },
-      {
-        "alg": "RS256",
-        "kty": "RSA",
-        "e": "AQAB",
-        "n": "sHJFsAxMN16bLYQPHB_yTRbKYP3EwH4XYMCsZHljxY1lx8G-K-jfzoZSnU7EsFdsl6hwpbeKdC0zxt4nTC7XAAqCkgscEZ8KJrrxyDuxNMhu3aLvc8e4cNBrXl1ijSxJpsE6AvUABjnSIgDZXR0Mtmfqe3p0ATfEJl6EsZ6Rm-_gqzB7IRliixEg-LLpbYN0NKZ9q4LuwYcUT1Ca5lxlVZLXF4p7ZybXelwR5lB4RMaPJ4RLBtSkagWEMNdjOrVKYHjS6zOgortInRjy4xiCNENyQenhWEWY3kn6d0S2qQyMkNH_ReuMLpUX_-VWy_Yl-PPbih5CO2gK2_Ot-sEz1w",
-        "kid": "178ab1dc5913d929d37c23dcaa961872f8d70b68",
-        "use": "sig"
-      }
-    ]
-  };
-
   const privateKey = {
     p: "5bxZBZejvyAK5_vtFMDI2vqmf2zBitAM-Y1tfpDZDIM5Q7jWSlFnhibcfkfK7fg_P4DC87gSkZtYRE5X5JttrG58CNsm8Vvj6DxLBhC_zbtxizhtlhbsV2euTxibeSSG45CjFWqlqXJqbPzhbQBxvwEL1gVu4_-AMU55gTcaHj0",
     kty: "RSA",
@@ -51,29 +30,31 @@
     n: "vnxiHn6cuLLf-w3Js200XxwgESgy4Gc81AUqdSFLBoMH4juZEqS3yMBpEWtk5t5gcnlEM5qE42o8i7UMhQ9YVPwjBRKj0KnHtY7Br8XZxM-FeyVyYhtLKg1NFoLUItOd5A4Cmq2hOvyel_CW_XB9cgaTEGcyvL-GJAY9Vu4qHgvT6bYAcfxaxos951U0JHJAyJqOspBkF1tffvFwSQmfQDQK-p99-kZTqypa12LKPlXDAWaCbu-DTNVjfz4ufRIs_FobwdPuuJ2Nbm1ou3CxEkdhSaXBvRRF_P3Q3cN5kOuGJ0z5aQLVB45Vq3jH1fDQyc7hRGZQj72s4Oc5kFWorQ"
   }
 
-  const header = {
-    typ: "JWT",
-    alg: publicKey.alg,
-    kid: publicKey.kid,//todo is this the wrong kid??
-  };
-
-  const payload = {
-    "iss": "accounts.google.com",
-    "azp": "595564072050-5t4i14ge3g0b7knrhn8an9pujha53m6q.apps.googleusercontent.com",
-    "aud": "595564072050-5t4i14ge3g0b7knrhn8an9pujha53m6q.apps.googleusercontent.com",
-    "sub": "109171373826051582598",
-    "email": "intertext.no@gmail.com",
-    "email_verified": true,
-    "at_hash": "jamKUOY4mA2W2s0_AKvErA",
-    "name": "intertext no",
-    "picture": "https://lh6.googleusercontent.com/-lAKCSPiA0vc/AAAAAAAAAAI/AAAAAAAAAAA/AMZuucmJhlFF4pFJOWQzJrthzwGiMXopag/s96-c/photo.jpg",
-    "given_name": "intertext",
-    "family_name": "no",
-    "locale": "no",
-    "iat": 1602759736,
-    "exp": 1602763336,
-    "jti": "3328672f071cdf5fa40257fe8e51597d513fd4c3"
-  };
+  const rawJWTobj = {
+      header: {
+        typ: "JWT",
+        alg: publicKey.alg,
+        kid: publicKey.kid,
+      },
+      payload: {
+        iss: "accounts.google.com",
+        azp: "595564072050-5t4i14ge3g0b7knrhn8an9pujha53m6q.apps.googleusercontent.com",
+        aud: "595564072050-5t4i14ge3g0b7knrhn8an9pujha53m6q.apps.googleusercontent.com",
+        sub: "109171373826051582598",
+        email: "intertext.no@gmail.com",
+        email_verified: true,
+        at_hash: "jamKUOY4mA2W2s0_AKvErA",
+        name: "intertext no",
+        picture: "https://lh6.googleusercontent.com/-lAKCSPiA0vc/AAAAAAAAAAI/AAAAAAAAAAA/AMZuucmJhlFF4pFJOWQzJrthzwGiMXopag/s96-c/photo.jpg",
+        given_name: "intertext",
+        family_name: "no",
+        locale: "no",
+        iat: 1602759736,
+        exp: 1602763336,
+        jti: "3328672f071cdf5fa40257fe8e51597d513fd4c3"
+      }
+    }
+  ;
 
   function Uint8ToBase64url(one) {
     const two = String.fromCharCode.apply(null, new Uint16Array(one));
@@ -115,9 +96,9 @@
     return atob(base64);
   }
 
-  async function makeJwt(privKey, header, payload) {
-    const base64urlHeader = toBase64url(header);
-    const base64urlPayload = toBase64url(payload);
+  async function signJwt(rawJWTobj, privKey) {
+    const base64urlHeader = toBase64url(rawJWTobj.header);
+    const base64urlPayload = toBase64url(rawJWTobj.payload);
     const data = base64urlHeader + '.' + base64urlPayload;
 
     const signature = await crypto.subtle.sign({
@@ -135,7 +116,7 @@
       name: 'RSASSA-PKCS1-v1_5',
       hash: 'sha-256'
     }, pubKey, signature2, new TextEncoder().encode(head + "." + pay));
-    if(!verify)
+    if (!verify)
       throw 'hackkkkk!';
     return {header: JSON.parse(base64urlToString(head)), payload: JSON.parse(base64urlToString(pay))};
   }
@@ -150,9 +131,9 @@
       hash: 'sha-256'
     }, false, ['verify']);
 
-    const jwt = await makeJwt(privKey, header, payload);
+    console.log(rawJWTobj);
+    const jwt = await signJwt(rawJWTobj, privKey);
     console.log(jwt);
-
     const verify = await verifyAndExtract(jwt, pubKey);
     console.log(verify);
 
