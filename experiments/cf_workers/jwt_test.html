@@ -85,22 +85,18 @@
   // Uint8Array to URL Safe Base64
   //
   // the shortest distant between two encodings... binary string
-  function arrayBufferUint8ToUrlBase64(buffer) {
-    const one = new Uint8Array(buffer);
-    // console.log("1: ", one);
-    var two = '';
+  function Uint8ToBase64url(one) {
+    let two = '';
     one.forEach(function (code) {
       two += String.fromCharCode(code);
     });
     // console.log("2: ", two);
     const three = btoa(two);
     // console.log("3: ", three);
-    const four = three.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+/g, '');
-    // console.log("4: ", four);
-    return four;
+    return three.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+/g, '');
   }
 
-  function arrayBufferUint8ToUrlBase64_r(four) {
+  function base64urlToUint8Array(four) {
     // console.log("4_ ", four);
     let three = four.replace(/-/g, '+').replace(/_/g, '/');
     const pad = three.length % 4;
@@ -118,21 +114,6 @@
     return one;
   }
 
-  function base64urlToBin(base64url) {
-    const str = base64url.replace(/\-/g, '+').replace(/_/g, '/');
-    const pad = str % 4;
-    if (pad === 2)
-      return str + '==';
-    else if (pad === 3)
-      return str + '=';
-    return atob(str);
-  }
-
-  function base64urlToarrayBufferUint8(base64url) {
-    const bin = base64urlToBin(base64url);
-    return new TextEncoder().encode(bin);
-  }
-
   const headerPayloadBase64url = toBase64url(header) + '.' + toBase64url(payload);
   (async function () {
     const privKey = await crypto.subtle.importKey('jwk', privateKey, {
@@ -148,9 +129,9 @@
       name: 'RSASSA-PKCS1-v1_5',
       hash: 'sha-256'
     }, privKey, new TextEncoder().encode(headerPayloadBase64url));
-    const sig = arrayBufferUint8ToUrlBase64(signature);
+    const sig = Uint8ToBase64url(new Uint8Array(signature));
     console.log(sig);
-    const signature2 = arrayBufferUint8ToUrlBase64_r(sig);
+    const signature2 = base64urlToUint8Array(sig);
 
     const verify = await crypto.subtle.verify({
       name: 'RSASSA-PKCS1-v1_5',
