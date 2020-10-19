@@ -1,0 +1,10 @@
+hello sunshine
+<h1>TWO</h1>
+<script>
+  const secureCallbackDomain = 'http://localhost:63342';
+
+  setTimeout(function () {
+    window.opener.postMessage('hello sunshine TWO', secureCallbackDomain);
+    window.close();
+  }, 5000);
+</script>
