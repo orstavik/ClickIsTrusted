@@ -14,11 +14,11 @@
 
   function openRequestedSinglePopup(event) {
     const size = {
-      width: Math.min(600, window.innerWidth),
-      height: Math.min(600, window.innerHeight),
+      width: Math.min(600, window.screen.width),
+      height: Math.min(600, window.screen.height),
     };
-    size.left = (window.innerWidth / 2) - (size.width / 2);
-    size.top = (window.innerHeight / 2) - (size.height / 2);
+    size.left = (window.screen.width / 2) - (size.width / 2);
+    size.top = (window.screen.height / 2) - (size.height / 2);
 
     const sizeStr = Object.entries(size).map(kv=>kv.join('=')).join(',');
     event.preventDefault();
