@@ -48,7 +48,9 @@ Demo of the hash SHA256 function.
 
 ## HowTo: base64url
 
-base64 is a handy format for taking binary text strings and encoding them into a smaller text format safe to be transported and positioned elsewhere. But. It turns out that base64 is not 100% safe either. It turns out that base64 is using `+` and `-` and `=` which are not safe to be used in urls. Therefore, we would like to convert base64 into an even safer text format base64url.
+base64 is a handy format for taking binary text strings and encoding them into a smaller text format safe to be transported and positioned elsewhere. But. It turns out that base64 is not 100% safe either. It turns out that base64 is using `+` and `/` and `=` which are not safe to be used in urls. Therefore, we would like to convert base64 into an even safer text format: base64url.
+
+base64url is the same as base64, except that +=>-, /=>_, and trailing = and == are removed. Yes. It is that simple.
 
 ```javascript
 function toBase64url(base64str) {
