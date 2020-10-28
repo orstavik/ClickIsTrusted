@@ -25,7 +25,7 @@ the self-closing cookie maker is very handy to make a self closing login window 
 The main page will just open the popup in a new window, and addEventListener('message') from the popup.
 
 ```html
-<h1>hello sunshine</h1>
+<h1>hello sunshine: ${cookie}</h1>
 RememberMe: <input type='checkbox' /><br>
 <a href="one" title="this is 1">open 'one'</a><br>
 <a href="two" title="this is 2">open 'two'</a>
@@ -118,27 +118,29 @@ RememberMe: <input type='checkbox' /><br>
   }
 </script>`;
 
-function popup(value, myDomain){ 
+function popup(myDomain){ 
   return `
-<h1>hello sunshine ${value}</h1>
+<h1>success, will self destruct</h1>
 <script>
   setTimeout(function () {
-    window.opener.postMessage('hello sunshine ${value}', '${myDomain}');
-    window.close();
+    window.opener.postMessage('popup-successful', '${myDomain}');
+    //window.close();
   }, 2000);
 </script>`;
 }
 
-const headers = {status: 201, headers: {'content-type': 'text/html'}};
-const myDomain = 'https://its-a-popup.2js-no.workers.dev';
+const myDomain = 'its-a-popup.2js-no.workers.dev';
 
 function handleRequest(req){
 
   const url = new URL(req.url);
   const [ignore, action, data] = url.pathname.split('/');
   if(action === 'one' || action === 'two')
-    return new Response(popup(action + ' ' + data, myDomain), headers);
-  return new Response(mainpage, headers);
+    return new Response(popup('https://' + myDomain), {status: 201, headers: {
+      'content-type': 'text/html',
+      'set-cookie': `popupCookie=${action + '+' + data}; Secure; HttpOnly; SameSite=Strict; Domain=${myDomain};`//Max-Age: 60; don't want the max-age yet!
+    }});
+  return new Response(mainpage, {status: 201, headers: {'content-type': 'text/html'}});
 }
 
 addEventListener('fetch', e => e.respondWith(handleRequest(e.request)));

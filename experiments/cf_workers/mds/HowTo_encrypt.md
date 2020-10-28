@@ -101,3 +101,6 @@ console.log(str2);
 // aGVsbG8gc3Vuc2hpbmUhPyN+PD4qIQ==
 // hello sunshine!?#~<>*! 
 ```
+
+## HowTo: make an IV (initial vector)?
+
