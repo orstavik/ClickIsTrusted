@@ -81,14 +81,28 @@ The popup itself will only contain some data (in a secure session cookie), and t
 The worker will present the two files, depending on the path. The worker is also responsible for setting any cookies on the response.
 
 ```javascript
-const mainpage = 
-`<h1>hello sunshine</h1>
+function getCookieValue(cookie, key) {
+  return cookie?.match(`(^|;)\\s*${key}\\s*=\\s*([^;]+)`)?.pop();
+}
+
+function mainpage(cookie, popupOrigin){ 
+  return `<h1>hello sunshine 21: ${cookie}</h1>
 RememberMe: <input type='checkbox' /><br>
 <a href="one" title="this is 1">open 'one'</a><br>
 <a href="two" title="this is 2">open 'two'</a>
 
 <script>
-  window.addEventListener('message', e => console.log(e)); //printing the message
+
+  function receiveLoginData(e){
+    if (e.origin !== "${popupOrigin}" || e.source !== loginWindow)
+      return;
+    const div = document.createElement('div');
+    div.innerText = e.data;
+    document.body.appendChild(div);
+  }
+
+  window.addEventListener('message', receiveLoginData);
+  
   for (let link of document.querySelectorAll("a"))
     link.addEventListener('click', openRequestedSinglePopup);
 
@@ -117,15 +131,16 @@ RememberMe: <input type='checkbox' /><br>
     loginWindow.focus();
   }
 </script>`;
+}
 
-function popup(myDomain){ 
+function popup(cookieData, myDomain){ 
   return `
 <h1>success, will self destruct</h1>
 <script>
-  setTimeout(function () {
-    window.opener.postMessage('popup-successful', '${myDomain}');
+  //setTimeout(function () {
+    window.opener.postMessage('${cookieData}', '${myDomain}');
     //window.close();
-  }, 2000);
+  //}, 2000);
 </script>`;
 }
 
@@ -136,11 +151,17 @@ function handleRequest(req){
   const url = new URL(req.url);
   const [ignore, action, data] = url.pathname.split('/');
   if(action === 'one' || action === 'two')
-    return new Response(popup('https://' + myDomain), {status: 201, headers: {
+    return new Response(popup(action + '+' + data, 'https://' + myDomain), {status: 201, headers: {
       'content-type': 'text/html',
-      'set-cookie': `popupCookie=${action + '+' + data}; Secure; HttpOnly; SameSite=Strict; Domain=${myDomain};`//Max-Age: 60; don't want the max-age yet!
+      'set-cookie': `popupCookie=${action + '+' + data}; Secure; HttpOnly; SameSite=Strict; Path=/; Domain=${myDomain};`
     }});
-  return new Response(mainpage, {status: 201, headers: {'content-type': 'text/html'}});
+  if(action === 'logout')
+    return new Response('logout', {status: 201, headers: {
+      'content-type': 'text/html',
+      'set-cookie': `popupCookie=undefined; Secure; HttpOnly; SameSite=Strict; Path=/; Max-Age=-1; Domain=${myDomain}; `
+    }});
+  const cookie = getCookieValue(req.headers.get('cookie'), 'popupCookie');
+  return new Response(mainpage(cookie, 'https://' + myDomain), {status: 201, headers: {'content-type': 'text/html'}});
 }
 
 addEventListener('fetch', e => e.respondWith(handleRequest(e.request)));
