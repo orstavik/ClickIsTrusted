@@ -6,12 +6,39 @@ const GOOGLE_REDIRECT_2 = 'https://goauth2.2js-no.workers.dev/fromGoogle';
 const GOOGLE_REDIRECT_1 = 'https://accounts.google.com/o/oauth2/v2/auth';
 const GOOGLE_CODE_LINK = 'https://oauth2.googleapis.com/token';
 
-//todo here we should encrypt a timestamp, and then we can verify that this timestamp is still valid.
 function randomString(length) {
   const iv = crypto.getRandomValues(new Uint8Array(length));
   return Array.from(iv).map(b => ('00' + b.toString(16)).slice(-2)).join('');
 }
 
+//CROSS REQUEST STATE SECRET
+const STATE_SECRET_TTL_MS = 3 * 60 * 1000;
+const STATE_SECRET_REGISTRY_LENGTH = 10000; //100000 = 240 000kb max size.
+const states = [];               //i don't have a clean up method for the registry length.
+
+function getStateSecret(ttl, stateRegistrySize) {
+  //1. the secret is a hexString of a random number
+  const secret = randomString(12);
+
+  //2. states is an LRU cache
+  states.length > (stateRegistrySize) && states.shift();
+  states.push(secret);
+
+  //3. The state secrets on live in the memory of cf worker until the timeout is reached.
+  //   When the timeout is reached, the state is deleted from the memory.
+  setTimeout(() => hasStateSecretOnce(secret), ttl);
+  return secret;
+}
+
+//The state secret is a nonce.
+//If it is read once, then it is also deleted from the state secret registry at the same time.
+function hasStateSecretOnce(state) {
+  const index = states.indexOf(state);
+  return index >= 0 ? states.splice(index, 1) : false;
+}
+//CROSS REQUEST STATE SECRET end
+
+//GET REDIRECT AND POST ACCESS_TOKEN
 function makeRedirect(path, params) {
   return path + '?' + Object.entries(params).map(([k, v]) => k + '=' + encodeURIComponent(v)).join('&');
 }
@@ -23,23 +50,26 @@ async function fetchAccessToken(path, data) {
     body: Object.entries(data).map(([k, v]) => k + '=' + encodeURIComponent(v)).join('&')
   });
 }
+//GET REDIRECT AND POST ACCESS_TOKEN end
 
-const states = [];
+async function processGoogleTokenPackage(tokenPackage) {
+  const jwtString = await tokenPackage.json();
+  return jwtString.id_token;
+  //todo unwrap JWT token
+}
 
 async function handleRequest(req) {
   const url = new URL(req.url);
   const [ignore, action, data] = url.pathname.split('/');
   if (action === 'mainpage') {
-    return new Response('mainpage, logutlink, loginlink');
+    return new Response('mainpage, logoutlink, loginlink');
   }
   if (action === 'login') {
-    const state = randomString(12);
-    states.push(state);
     return Response.redirect(makeRedirect(GOOGLE_REDIRECT_1, {
-      state,
+      state: getStateSecret(STATE_SECRET_TTL_MS, STATE_SECRET_REGISTRY_LENGTH),
+      nonce: randomString(12),
       client_id: GOOGLE_CLIENTID,
       redirect_uri: GOOGLE_REDIRECT_2,
-      nonce: randomString(12),
       scope: 'openid email',
       response_type: 'code',
     }));
@@ -47,7 +77,7 @@ async function handleRequest(req) {
   if (action === 'fromGoogle') {
     const code = url.searchParams.get('code');
     const state = url.searchParams.get('state');
-    if (states.indexOf(state) === -1)
+    if (!hasStateSecretOnce(state))
       return new Response('state is lost');
 
     const tokenPackage = await fetchAccessToken(
@@ -59,10 +89,8 @@ async function handleRequest(req) {
         grant_type: 'authorization_code'
       }
     );
-
-    const jwtString = await tokenPackage.json();
-
-    return new Response(JSON.stringify(jwtString), {status: 201});
+    const body = await processGoogleTokenPackage(tokenPackage);
+    return new Response(body, {status: 201});
   }
   return new Response('hello sunshine google oauth106');
 }
