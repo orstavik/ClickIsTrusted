@@ -26,6 +26,22 @@ async function fetchAccessToken(path, data) {
 
 const states = [];
 
+async function githubProcessTokenPackage(accessTokenPackage) {
+  const data = await accessTokenPackage.text();
+  const x = {};
+  data.split('&').map(pair => pair.split('=')).forEach(([k, v]) => x[k] = v);
+  const accessToken = x['access_token'];
+  const user = await fetch('https://api.github.com/user', {
+    headers: {
+      'Authorization': 'token ' + accessToken,
+      'User-Agent': '2js-no',
+      'Accept': 'application/vnd.github.v3+json'
+    }
+  });
+  const userData = await user.json();
+  return userData.id + userData.login;
+}
+
 async function handleRequest(req) {
   const url = new URL(req.url);
   const [ignore, action, data] = url.pathname.split('/');
@@ -56,23 +72,10 @@ async function handleRequest(req) {
       redirect_uri: GITHUB_REDIRECT,
       state
     });
-
-
-    const data = await accessTokenPackage.text();
-    const x = {};
-    data.split('&').map(pair => pair.split('=')).forEach(([k, v]) => x[k] = v);
-    const accessToken = x['access_token'];
-    const user = await fetch('https://api.github.com/user', {
-      headers: {
-        'Authorization': 'token ' + accessToken,
-        'User-Agent': '2js-no',
-        'Accept': 'application/vnd.github.v3+json'
-      }
-    });
-    const userText = await user.text();
+    const userText = await githubProcessTokenPackage(accessTokenPackage);
     return new Response(userText, {status: 201});
   }
-  return new Response('hello sunshine GITHUB oauth19');
+  return new Response('hello sunshine GITHUB oauth20');
 }
 
 addEventListener('fetch', e => e.respondWith(handleRequest(e.request)));
