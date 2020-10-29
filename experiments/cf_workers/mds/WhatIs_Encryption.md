@@ -1,6 +1,7 @@
 # WhatIs: encryption
 
 ## 1. What is  AES-GCM 
+
 `AES-GCM` is an authenticated encryption mode that uses the AES block cipher in counter mode with a polynomial MAC based on Galois field multiplication.
   
  AES stands for `Advanced Encryption Standard` and is a symmetric block encryption algorithm. Symmetric encryption means that the key used for encryption and decryption is identical, as opposed to asymmetric encryption where there are two keys; a private key and a public key. The public key is used to encrypt data, and only someone with the private key can read the encrypted data. The block size of AES is 128 bits. This means that the algorithms work in chunks of 128 bits.
@@ -104,7 +105,8 @@ window.crypto.subtle.encrypt(
 ```
 
 ### 5. How to decrypt data
-  Application performs the decryption by using the `crypto.subtle.decrypt` method with the private-key from the CryptoKey object. If the `decrypt` method succeeds the resulting ArrayBuffer formatted data is converted to Uint8Array format and stored in plaintext variable
+
+Application performs the decryption by using the `crypto.subtle.decrypt` method with the private-key from the CryptoKey object. If the `decrypt` method succeeds the resulting ArrayBuffer formatted data is converted to Uint8Array format and stored in plaintext variable
 ```javascript
 window.crypto.subtle.encrypt(
     {

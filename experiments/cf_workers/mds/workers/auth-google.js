@@ -53,9 +53,11 @@ async function fetchAccessToken(path, data) {
 //GET REDIRECT AND POST ACCESS_TOKEN end
 
 async function processGoogleTokenPackage(tokenPackage) {
-  const jwtString = await tokenPackage.json();
-  return jwtString.id_token;
-  //todo unwrap JWT token
+  const jwt = await tokenPackage.json();
+  const [header, payloadB64url, signature] = jwt.id_token.split('.');
+  const payloadText = atob(fromBase64url(payloadB64url));
+  const payload = JSON.parse(payloadText);
+  return payload.sub;
 }
 
 async function handleRequest(req) {
