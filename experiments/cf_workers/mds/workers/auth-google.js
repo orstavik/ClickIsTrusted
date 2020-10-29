@@ -13,7 +13,7 @@ function randomString(length) {
 
 //CROSS REQUEST STATE SECRET
 const STATE_SECRET_TTL_MS = 3 * 60 * 1000;
-const STATE_SECRET_REGISTRY_LENGTH = 10000; //100000 = 240 000kb max size.
+const STATE_SECRET_REGISTRY_LENGTH = 10000; //10000 = 24 000kb max size.
 const states = [];               //i don't have a clean up method for the registry length.
 
 function getStateSecret(ttl, stateRegistrySize) {

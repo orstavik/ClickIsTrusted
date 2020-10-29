@@ -10,19 +10,31 @@ function randomString(length) {
   return Array.from(iv).map(b => ('00' + b.toString(16)).slice(-2)).join('');
 }
 
-function makeRedirectUri(path, params) {
+
+//GET REDIRECT AND POST ACCESS_TOKEN
+function makeRedirect(path, params) {
   return path + '?' + Object.entries(params).map(([k, v]) => k + '=' + encodeURIComponent(v)).join('&');
 }
 
-async function fetchTokenGITHUB(code, client_id, redirect_uri, client_secret, state) {
-  const data = {code, client_id, client_secret, redirect_uri, state};
-  const dataString = Object.entries(data).map(([k, v]) => k + '=' + encodeURIComponent(v)).join('&');
-
-  const fromGITHUB = await fetch(GITHUB_ACCESS_TOKEN_LINK, {
+async function fetchAccessToken(path, data) {
+  return await fetch(path, {
     method: 'POST',
     headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-    body: dataString
+    body: Object.entries(data).map(([k, v]) => k + '=' + encodeURIComponent(v)).join('&')
   });
+}
+//GET REDIRECT AND POST ACCESS_TOKEN end
+
+async function fetchTokenGITHUB(code, client_id, redirect_uri, client_secret, state) {
+  const data = {code, client_id, client_secret, redirect_uri, state};
+  const fromGITHUB = await fetchAccessToken(GITHUB_ACCESS_TOKEN_LINK, data);
+  // const dataString = Object.entries(data).map(([k, v]) => k + '=' + encodeURIComponent(v)).join('&');
+  //
+  // const fromGITHUB = await fetch(GITHUB_ACCESS_TOKEN_LINK, {
+  //   method: 'POST',
+  //   headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+  //   body: dataString
+  // });
   return fromGITHUB.text();
 }
 
@@ -37,7 +49,7 @@ async function handleRequest(req) {
   if (action === 'login') {
     const state = randomString(12);
     states.push(state);
-    return Response.redirect(makeRedirectUri(
+    return Response.redirect(makeRedirect(
       GITHUB_OAUTH_LINK, {
         state,
         client_id: GITHUB_CLIENTID,
@@ -65,7 +77,7 @@ async function handleRequest(req) {
     const userText = await user.text();
     return new Response(userText, {status: 201});
   }
-  return new Response('hello sunshine GITHUB oauth14');
+  return new Response('hello sunshine GITHUB oauth19');
 }
 
 addEventListener('fetch', e => e.respondWith(handleRequest(e.request)));
