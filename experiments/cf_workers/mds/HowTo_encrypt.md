@@ -6,7 +6,7 @@
 
 2. Of the native algorithms supported in V8, there are only four that supports encryption: RSA-OAEP, AES-CTR, AES-CBC, and AES-GCM. We need a synchronic algorithm, and then there are only three alternatives: AES-CTR, AES-CBC, and AES-GCM.
 
-3. The AES-GCM is the only one of these three algorithms that support checking both authenticity and integrity. Put simply, the GCM mode of AES include a checksum check within the algorithm itself that not only ensures that the encrypted message is secret, but also that it cannot be slightly altered. With AES-GCM, a checksum is included, which is nice.
+3. The AES-GCM is the only one of these three algorithms that support checking both authenticity and integrity. Put simply, the GCM mode of AES include a checksum check within the algorithm itself that not only ensures that the encrypted message is a) made using the secret key (authenticity) and not just a random set of numbers, and b) not slightly altered afterwards (integrity). With AES-GCM, such a two purpose checksum check is included.
 
 This means that AES-GCM is 1) the only native web crypto API algorithm for 2) synchronic encryption/decryption that 3) bake in checksum checking.   
 
