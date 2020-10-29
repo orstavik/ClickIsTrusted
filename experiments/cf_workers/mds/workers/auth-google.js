@@ -4,6 +4,7 @@ const GOOGLE_CLIENTID = '595564072050-5t4i14ge3g0b7knrhn8an9pujha53m6q.apps.goog
 const GOOGLE_CLIENTSECRET = '-GAqDZ67_FXh4189fYV-dSxi';
 const GOOGLE_REDIRECT_2 = 'https://goauth2.2js-no.workers.dev/fromGoogle';
 const GOOGLE_REDIRECT_1 = 'https://accounts.google.com/o/oauth2/v2/auth';
+const GOOGLE_CODE_LINK = 'https://oauth2.googleapis.com/token';
 
 //todo here we should encrypt a timestamp, and then we can verify that this timestamp is still valid.
 function randomString(length) {
@@ -11,21 +12,16 @@ function randomString(length) {
   return Array.from(iv).map(b => ('00' + b.toString(16)).slice(-2)).join('');
 }
 
-function makeRedirect(params) {
-  return GOOGLE_REDIRECT_1 + '?' +
-    Object.entries(params).map(([k, v]) => k + '=' + encodeURIComponent(v)).join('&');
+function makeRedirect(path, params) {
+  return path + '?' + Object.entries(params).map(([k, v]) => k + '=' + encodeURIComponent(v)).join('&');
 }
 
-async function fetchTokenGoogle(code, client_id, redirect_uri, client_secret) {
-  const data = {code, client_id, client_secret, redirect_uri, 'grant_type': 'authorization_code'};
-  const dataString = Object.entries(data).map(([k, v]) => k + '=' + encodeURIComponent(v)).join('&');
-
-  const fromGoogle = await fetch('https://oauth2.googleapis.com/token', {
+async function fetchAccessToken(path, data) {
+  return await fetch(path, {
     method: 'POST',
     headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-    body: dataString
+    body: Object.entries(data).map(([k, v]) => k + '=' + encodeURIComponent(v)).join('&')
   });
-  return fromGoogle.json();
 }
 
 const states = [];
@@ -39,7 +35,7 @@ async function handleRequest(req) {
   if (action === 'login') {
     const state = randomString(12);
     states.push(state);
-    return Response.redirect(makeRedirect({
+    return Response.redirect(makeRedirect(GOOGLE_REDIRECT_1, {
       state,
       client_id: GOOGLE_CLIENTID,
       redirect_uri: GOOGLE_REDIRECT_2,
@@ -53,10 +49,22 @@ async function handleRequest(req) {
     const state = url.searchParams.get('state');
     if (states.indexOf(state) === -1)
       return new Response('state is lost');
-    const jwtString = await fetchTokenGoogle(code, GOOGLE_CLIENTID, GOOGLE_REDIRECT_2, GOOGLE_CLIENTSECRET);
+
+    const tokenPackage = await fetchAccessToken(
+      GOOGLE_CODE_LINK, {
+        code,
+        client_id: GOOGLE_CLIENTID,
+        client_secret: GOOGLE_CLIENTSECRET,
+        redirect_uri: GOOGLE_REDIRECT_2,
+        grant_type: 'authorization_code'
+      }
+    );
+
+    const jwtString = await tokenPackage.json();
+
     return new Response(JSON.stringify(jwtString), {status: 201});
   }
-  return new Response('hello sunshine google oauth104');
+  return new Response('hello sunshine google oauth106');
 }
 
 addEventListener('fetch', e => e.respondWith(handleRequest(e.request)));
