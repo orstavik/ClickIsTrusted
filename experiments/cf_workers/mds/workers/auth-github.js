@@ -10,7 +10,6 @@ function randomString(length) {
   return Array.from(iv).map(b => ('00' + b.toString(16)).slice(-2)).join('');
 }
 
-
 //GET REDIRECT AND POST ACCESS_TOKEN
 function makeRedirect(path, params) {
   return path + '?' + Object.entries(params).map(([k, v]) => k + '=' + encodeURIComponent(v)).join('&');
@@ -24,19 +23,6 @@ async function fetchAccessToken(path, data) {
   });
 }
 //GET REDIRECT AND POST ACCESS_TOKEN end
-
-async function fetchTokenGITHUB(code, client_id, redirect_uri, client_secret, state) {
-  const data = {code, client_id, client_secret, redirect_uri, state};
-  const fromGITHUB = await fetchAccessToken(GITHUB_ACCESS_TOKEN_LINK, data);
-  // const dataString = Object.entries(data).map(([k, v]) => k + '=' + encodeURIComponent(v)).join('&');
-  //
-  // const fromGITHUB = await fetch(GITHUB_ACCESS_TOKEN_LINK, {
-  //   method: 'POST',
-  //   headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-  //   body: dataString
-  // });
-  return fromGITHUB.text();
-}
 
 const states = [];
 
@@ -63,7 +49,16 @@ async function handleRequest(req) {
     const state = url.searchParams.get('state');
     if (states.indexOf(state) === -1)
       return new Response('Error 667: state timed out');
-    const data = await fetchTokenGITHUB(code, GITHUB_CLIENTID, GITHUB_REDIRECT, GITHUB_CLIENTSECRET, state);
+    const accessTokenPackage = await fetchAccessToken(GITHUB_ACCESS_TOKEN_LINK, {
+      code,
+      client_id: GITHUB_CLIENTID,
+      client_secret: GITHUB_CLIENTSECRET,
+      redirect_uri: GITHUB_REDIRECT,
+      state
+    });
+
+
+    const data = await accessTokenPackage.text();
     const x = {};
     data.split('&').map(pair => pair.split('=')).forEach(([k, v]) => x[k] = v);
     const accessToken = x['access_token'];
