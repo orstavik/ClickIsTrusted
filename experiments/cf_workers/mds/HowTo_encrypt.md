@@ -1,5 +1,15 @@
 #  HowTo: make a sessionID cookie using Cloudflare workers
 
+## Why: AES-GCM?
+
+1. We want a native, web crypto solution. Having an algorithm that can be triggered using a native library will be a) much more efficient, b) much faster, and c) much less complex.
+
+2. Of the native algorithms supported in V8, there are only four that supports encryption: RSA-OAEP, AES-CTR, AES-CBC, and AES-GCM. We need a synchronic algorithm, and then there are only three alternatives: AES-CTR, AES-CBC, and AES-GCM.
+
+3. The AES-GCM is the only one of these three algorithms that support checking both authenticity and integrity. Put simply, the GCM mode of AES include a checksum check within the algorithm itself that not only ensures that the encrypted message is secret, but also that it cannot be slightly altered. With AES-GCM, a checksum is included, which is nice.
+
+This means that AES-GCM is 1) the only native web crypto API algorithm for 2) synchronic encryption/decryption that 3) bake in checksum checking.   
+
 ## HowTo: HASH SHA-256? 
 
 HASH SHA-256 is a hashing algorithm that creates a random number/string given different strings. The hash algorithm always returns the same output for the same input, but you cannot recreate the input from the output (without serious, timeconsuming and costly effort). It is a one way function.
@@ -112,6 +122,18 @@ IV stands for "initial vector", and functions as a 'second secret' to the AES-GC
 The IV passwords should be different from each other: two messages should not be encrypted with the same IV. If an attacker has several messages with the same IV, it is simpler for him/her to analyze the group of encrypted messages that uses the same IV to mine out the normal, universal secret. How much simpler you ask, well that I don't know.
 
 To keep IV different (enough), the IV is a random list of 12 Uint8 (one byte unsigned integers, ie. numbers from 0 to 255). To generate such a list is simple enough: `crypto.getRandomValues(new Uint8Array(12));`.
+
+### Why use IV, and not just the message? as the random input
+
+Why do we need the IV at all, why can't we just use for example the start of the message? Or some kind of hash of the message? Isn't that random input enough?
+
+If we for example just used the first 12 chars of the input message, then we might think of them as different, but the might not be. First, only 26chars of the english alphabet might be represented, and that is not 256. Second, the messages might be wrapped the same way, such as all being JSON tokens: `{ alg: 'AES-GCM', ...`. So, using the first twelve chars in the message as the source of a random IV would not work.
+
+But how about using a hash of the message, such as SHA256? The main problem with the hash is that it would make it difficult to decrypt the message. I think. That looking at the message, holding the universal secret in one hand, the AES-GCM algorithm wouldn't be able to figure out the random IV from the ciphertext.
+
+Thus. A random IV must be made for each encryption, to ensure that the variable input of the AES-GCM algorithm is always varied enough, and then that IV vector must then be made available to the decryption process, so that it has all the passwords needed to decrypt the message. This hides the universal secret from being mined out from crypto analysis.
+
+### HowTo: convert IV to and from string?
 
 As we need to share the IV with the encrypted message, we need to convert this list of numbers into characters that are safe to pass over the internet: ie. base64url. To convert an array of 12 numbers into a base64url, and back again, we do like this:
 ```javascript
