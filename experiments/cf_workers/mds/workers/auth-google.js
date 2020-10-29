@@ -21,7 +21,7 @@ function getStateSecret(ttl, stateRegistrySize) {
   const secret = randomString(12);
 
   //2. states is an LRU cache
-  states.length > (stateRegistrySize) && states.shift();
+  states.length > stateRegistrySize && states.shift();
   states.push(secret);
 
   //3. The state secrets on live in the memory of cf worker until the timeout is reached.
@@ -78,7 +78,7 @@ async function handleRequest(req) {
     const code = url.searchParams.get('code');
     const state = url.searchParams.get('state');
     if (!hasStateSecretOnce(state))
-      return new Response('state is lost');
+      return new Response('Error 667: state timed out');
 
     const tokenPackage = await fetchAccessToken(
       GOOGLE_CODE_LINK, {
@@ -89,6 +89,8 @@ async function handleRequest(req) {
         grant_type: 'authorization_code'
       }
     );
+
+
     const body = await processGoogleTokenPackage(tokenPackage);
     return new Response(body, {status: 201});
   }
