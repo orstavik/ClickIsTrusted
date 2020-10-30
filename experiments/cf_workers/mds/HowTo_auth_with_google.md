@@ -10,8 +10,6 @@
 ## Demo
 
 ```javascript
-//https://developers.google.com/identity/protocols/oauth2/openid-connect
-
 const GOOGLE_CLIENTID = '595564072050-5t4i14ge3g0b7knrhn8an9pujha53m6q.apps.googleusercontent.com';
 const GOOGLE_CLIENTSECRET = '-GAqDZ67_FXh4189fYV-dSxi';
 const GOOGLE_REDIRECT = 'https://goauth2.2js-no.workers.dev/fromGoogle';
@@ -97,5 +95,6 @@ const keyType = {
 
 ## Ref
 
+ * [the google doc page that i found most informative](https://developers.google.com/identity/protocols/oauth2/openid-connect)
  * [https://www.googleapis.com/oauth2/v3/certs](https://www.googleapis.com/oauth2/v3/certs) 
 
