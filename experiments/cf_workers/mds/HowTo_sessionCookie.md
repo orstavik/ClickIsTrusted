@@ -147,6 +147,21 @@ To create a **rememberMe** cookie, we set an `Expire` date or `Max-age` several 
 
 To create a **rolling cookie**, the server/worker sets an `Expire` date or `Max-age` for a medium amount of time into the future: for example 4 hours (a long lunch break) or 10days (a short holiday). While the user remains active, this timeframe is continuously pushed into the future every time the browser interacts with the server. (It is of course possible to only update the session once for example it is halfway spent: for example only give a new 4 hour session once the current rolling session has less than 2hours left on the clock. Such a simple check can dramatically reduce the network overhead needed to extend the rolling cookie on each interaction).
 
+## HowTo: send cookies using `fetch`
+
+The default value for `credentials` is `"same-origin"`. The default for `credentials` wasn't always the same, though. The following versions of browsers implemented an older version of the `fetch` specification where the default was `'omit'`:
+
+ * Firefox 39-60
+ * Chrome 42-67
+ * Safari 10.1-11.1.2
+
+If you target these browsers, it's advisable to always specify `credentials: 'same-origin'` explicitly with all fetch requests instead of relying on the default:
+
+```javascript
+fetch('/users', {
+  credentials: 'same-origin'
+});
+```
 
 ### References 
 
@@ -154,3 +169,4 @@ To create a **rolling cookie**, the server/worker sets an `Expire` date or `Max-
 * [MDN: Cookies](https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies)
 * [RFC 6265](https://tools.ietf.org/html/rfc6265#section-4.1)
 * [Blog: "Just how many web users really disable cookies or JavaScript?"](https://blog.yell.com/2016/04/just-many-web-users-disable-cookies-javascript/)
+* [sending cookies using fetch](https://github.com/github/fetch#user-content-handling-http-error-statuses:~:text=)-,Sending%20cookies,Note%3A%20due%20to%20limitations%20of%20XMLHttpRequest%2C%20using%20credentials%3A%20'omit'%20is%20not%20respected%20for%20same%20domains%20in%20browsers%20where%20this%20polyfill%20is%20active.%20Cookies%20will%20always%20be%20sent%20to%20same%20domains%20in%20older%20browsers.,-Receiving%20cookies)
