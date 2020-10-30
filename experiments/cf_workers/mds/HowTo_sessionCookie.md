@@ -163,6 +163,12 @@ fetch('/users', {
 });
 ```
 
+## Do user's logout?
+
+You can't rely on users logging out for security: others might come in and use their account when they leave the computer at the library. But, you need to provide users with an active choice of logging out of an app. And the default option is to have a session cookie, not save credentials on a strange machine.
+
+[good discussion](https://ux.stackexchange.com/questions/57132/do-users-log-out)
+
 ### References 
 
 * [Sessions and Cookies](https://auth0.com/docs/sessions-and-cookies)

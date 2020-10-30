@@ -95,6 +95,7 @@ const keyType = {
 
 ## Ref
 
- * [the google doc page that i found most informative](https://developers.google.com/identity/protocols/oauth2/openid-connect)
+ * [the google doc page that i found most informative (see 'serverflow')](https://developers.google.com/identity/protocols/oauth2/openid-connect)
+ * [page nr 2 for google describing oauth2](https://developers.google.com/identity/protocols/oauth2/web-server)
  * [https://www.googleapis.com/oauth2/v3/certs](https://www.googleapis.com/oauth2/v3/certs) 
 

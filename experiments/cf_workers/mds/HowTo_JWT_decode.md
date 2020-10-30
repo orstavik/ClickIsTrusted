@@ -1,5 +1,7 @@
 # HowTo: decode JWT objects?
 
+[jwt.io](https://jwt.io/)
+
 ## step 1: jwt = `header.payload.signature`
 
 ```javascript

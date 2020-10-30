@@ -129,8 +129,13 @@ window.crypto.subtle.encrypt(
   In June 2003, the U.S. NSA announced that the AES cipher is strong enough to protect information that constitutes state secrets. Up to the SECRET level it was allowed to use keys 128 bits long, for the TOP SECRET level it was recommended to use keys 192 bits long and 256 bits long. After the introduction of the new encryption standard AES, attempts to open it significantly increased. The combination of the boomerang method and associated keys led Alex Biryukov and Dmitry Khovratovich to the opening of the AES-192 and AES-256 versions (all rounds) in July 2009. Both attacks were conducted under the assumption that the cryptanalyst intercepted pairs of "open text - ciphertext" obtained on different secret keys. Although the attack works against any algorithm key, it is now, and probably will remain forever theoretical, since the computational complexity of the 2^119 attack is outside our computers. It is interesting that the authors note the "incapacity" of the attack against AES-128, although, ironically, it is the 256-bit key that was intended to encrypt the most sensitive information, rather than the 128-bit key.
 
 ### Reference
+
 * [AES-GCM](https://www.w3.org/TR/WebCryptoAPI/#aes-gcm)
 * [MDN: encrypt()](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/encrypt)
 * [MDN: decrypt()](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/decrypt)
 * [MDN: CryptoKey](https://developer.mozilla.org/en-US/docs/Web/API/CryptoKey)
 * [Mika Luoma-aho: JavaScript Web Cryptography API](https://www.theseus.fi/bitstream/handle/10024/92960/Web_Cryptography_API_Luoma-aho.pdf)
+* [make RSA jwk keys online (not aes-gcm)](https://mkjwk.org/)
+* [example 1: aes-gcm encryption/decryption using web crypto](https://gist.github.com/chrisveness/43bcda93af9f646d083fad678071b90a)
+* [wikipedia: gcm](https://en.wikipedia.org/wiki/Galois/Counter_Mode)
+* [example 2: sign and verify using web crypto](https://coolaj86.com/articles/sign-jwt-webcrypto-vanilla-js/)
