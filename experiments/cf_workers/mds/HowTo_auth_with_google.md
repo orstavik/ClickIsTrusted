@@ -7,6 +7,8 @@
 5. our worker then goes and fetches the token from google using `code` and `client_secret`. This happens across a secure SSL connection between cf and google, so we trust the response here without question.
 6. we then unwrap the jwt token received from google. This will be used to set create the session id.
 
+## Demo
+
 ```javascript
 //https://developers.google.com/identity/protocols/oauth2/openid-connect
 
@@ -73,3 +75,27 @@ async function handleRequest(req){
 
 addEventListener('fetch', e=> e.respondWith(handleRequest(e.request)));
 ```
+
+## How to get the public key to verify google's RSA sign?
+
+When a cf worker (serverside app) gets a jwt directly from a google server over HTTPS, then we don't need to verify the signature. We can trust that the public key is from google. But. If we wanted to verify the signature, we would need to get the google public key. This is how we do that. 
+
+```javascript
+let googleKeys = {};
+const keyType = {
+  name: 'RSASSA-PKCS1-v1_5',
+  hash: 'sha-256'
+};
+(async function () {
+  const response = await fetch('https://www.googleapis.com/oauth2/v3/certs');
+  const rawKeys = await response.json();
+  for (let googKey of rawKeys.keys)
+    googleKeys[googKey.kid] = await crypto.subtle.importKey('jwk', googKey, keyType, false, ['verify']);
+  console.log(googleKeys);
+})();
+```
+
+## Ref
+
+ * [https://www.googleapis.com/oauth2/v3/certs](https://www.googleapis.com/oauth2/v3/certs) 
+
