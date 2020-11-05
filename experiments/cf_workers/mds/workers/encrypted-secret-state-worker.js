@@ -110,11 +110,11 @@ async function getStateSecret(ttl) {
   return uint8ToHexString(iv) + '.' + toBase64url(btoa(cipher));
 }
 
-async function checkStateSecret(data) {
+async function checkStateSecret(data, password) {
   const [ivText, cipherB64url] = data.split('.');
   const iv = hexStringToUint8(ivText);
   const cipher = atob(fromBase64url(cipherB64url));
-  const payload = await decryptAESGCM(SECRET, iv, cipher);
+  const payload = await decryptAESGCM(password, iv, cipher);
   let [iat, ttl, someOtherState] = payload.split('.');
   iat = parseInt(iat);
   ttl = parseInt(ttl);
@@ -129,7 +129,7 @@ async function handleRequest(req) {
   const url = new URL(req.url);
   const [ignore, action, data] = url.pathname.split('/');
   if (action === 'decrypt') {
-    let {iat, ttl, someOtherState, now, stillTimeToLive, notAFutureDream, isValid} = await checkStateSecret(data);
+    let {iat, ttl, someOtherState, now, stillTimeToLive, notAFutureDream, isValid} = await checkStateSecret(data, SECRET);
     return new Response(`iat: ${iat}; ttl: ${ttl}; extra state: ${someOtherState}; now: ${now}; now&lt;iat+ttl===${stillTimeToLive}; iat&lt;now===${notAFutureDream}; valid? ${isValid} <a href='/'>new state secret</a>`, header);
   }
   const stateSecret = await getStateSecret(STATE_SECRET_TTL);
