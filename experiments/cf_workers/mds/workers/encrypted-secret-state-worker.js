@@ -103,25 +103,37 @@ const SECRET = 'klasjdfoqjpwoekfj!askdfj';
 const STATE_SECRET_TTL = 5 * 1000;  //5sec is simpler to test.
 const header = {status: 201, headers: {'content-type': 'text/html'}};
 
+async function getStateSecret(ttl) {
+  const state = [Date.now(), ttl, uint8ToHexString(crypto.getRandomValues(new Uint8Array(8)))].join('.');
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const cipher = await encryptAESGCM(SECRET, iv, state);
+  return uint8ToHexString(iv) + '.' + toBase64url(btoa(cipher));
+}
+
+async function checkStateSecret(data) {
+  const [ivText, cipherB64url] = data.split('.');
+  const iv = hexStringToUint8(ivText);
+  const cipher = atob(fromBase64url(cipherB64url));
+  const payload = await decryptAESGCM(SECRET, iv, cipher);
+  let [iat, ttl, someOtherState] = payload.split('.');
+  iat = parseInt(iat);
+  ttl = parseInt(ttl);
+  const now = Date.now();
+  const stillTimeToLive = now < iat + ttl;
+  const notAFutureDream = iat < now;
+  const isValid = stillTimeToLive && notAFutureDream;
+  return {iat, ttl, someOtherState, now, stillTimeToLive, notAFutureDream, isValid};
+}
+
 async function handleRequest(req) {
   const url = new URL(req.url);
   const [ignore, action, data] = url.pathname.split('/');
   if (action === 'decrypt') {
-    const [ivText, cipherB64url] = data.split('.');
-    const iv = hexStringToUint8(ivText);
-    const cipher = atob(fromBase64url(cipherB64url));
-    const payload = await decryptAESGCM(SECRET, iv, cipher);
-    let [iat, ttl, someOtherState] = payload.split('.');
-    iat = parseInt(iat);
-    ttl = parseInt(ttl);
-    const now = Date.now();
-    return new Response(`iat: ${iat}; ttl: ${ttl}; extra state: ${someOtherState}; now: ${now}; now&lt;iat+ttl===${now < iat + ttl}; iat&lt;now===${iat < now}; <a href='/'>new state secret</a>`, header);
+    let {iat, ttl, someOtherState, now, stillTimeToLive, notAFutureDream, isValid} = await checkStateSecret(data);
+    return new Response(`iat: ${iat}; ttl: ${ttl}; extra state: ${someOtherState}; now: ${now}; now&lt;iat+ttl===${stillTimeToLive}; iat&lt;now===${notAFutureDream}; valid? ${isValid} <a href='/'>new state secret</a>`, header);
   }
-  const state = [Date.now(), STATE_SECRET_TTL, uint8ToHexString(crypto.getRandomValues(new Uint8Array(8)))].join('.');
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const cipher = await encryptAESGCM(SECRET, iv, state);
-  const stateSecret = uint8ToHexString(iv) + '.' + toBase64url(btoa(cipher));
-  return new Response(`Here is your 666 stateSecret: ${stateSecret}. <a href='/decrypt/${stateSecret}'>Check secret</a>`, header);
+  const stateSecret = await getStateSecret(STATE_SECRET_TTL);
+  return new Response(`Your stateSecret is (ttl=5): ${stateSecret}. <a href='/decrypt/${stateSecret}'>Check secret</a>`, header);
 }
 
 addEventListener('fetch', e => e.respondWith(handleRequest(e.request)));
