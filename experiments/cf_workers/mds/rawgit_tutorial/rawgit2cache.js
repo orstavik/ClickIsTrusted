@@ -21,19 +21,23 @@ function cacheDuration(path){
   return version.match(/[\da-f]{40}/) ? 31556926 : -1;
 }
 
-async function fetchAndCache(path) {
+async function handleRequest(req) {
+  //1. parse the incoming request
+  const url = new URL(req.url);
+  const path = url.pathname.substr(1);
   const ttl = cacheDuration(path);
+
+  //2. fetch the origin file. Use CF workers fetch to cache directive
   const serverCacheDirective = ttl? {cf: {cacheTtl: ttl,cacheEverything: true}}: undefined;
   const rawGithubFile = await fetch(ROOT + path, serverCacheDirective);
+
+  //3. update the response, mime-type and cache-control
   const result = new Response(rawGithubFile.body, ttl < 0? undefined: rawGithubFile);
   result.headers.set('Content-Type', mimeType(path));
   result.headers.set("Cache-Control", `max-age=${ttl}`);
-  return result;
-}
 
-async function handleRequest(req) {
-  const url = new URL(req.url);
-  return await fetchAndCache(url.pathname.substr(1));
+  //4. return the result
+  return result;
 }
 
 addEventListener('fetch', e => e.respondWith(handleRequest(e.request)));

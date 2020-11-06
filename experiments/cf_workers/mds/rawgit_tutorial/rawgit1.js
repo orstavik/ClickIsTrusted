@@ -10,16 +10,20 @@ function mimeType(path){
   }[filetype];
 }
 
-async function fetchAndReplaceContentTypeHeader(path) {
+async function handleRequest(req) {
+  //1. parse the incoming request
+  const url = new URL(req.url);
+  const path = url.pathname.substr(1);
+
+  //2. fetch the origin file
   const rawGithubFile = await fetch(ROOT + path);
+
+  //3. update the response, as needed
   const result = new Response(rawGithubFile.body, rawGithubFile);
   result.headers.set('content-type', mimeType(path));
-  return result;
-}
 
-async function handleRequest(req) {
-  const url = new URL(req.url);
-  return await fetchAndReplaceContentTypeHeader(url.pathname.substr(1));
+  //4. return the result
+  return result;
 }
 
 addEventListener('fetch', e => e.respondWith(handleRequest(e.request)));

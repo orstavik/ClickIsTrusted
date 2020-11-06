@@ -1,26 +1,22 @@
 const ROOT = 'https://raw.githubusercontent.com/';
-const MAX_MEMORY_CACHE = 1000;
+const KEYCACHE_SIZE = 1000;
 
-// LRU (least recently used) cache
-const cache = {};
-let cacheSize = 0;
-
-function getLRU(key) {
-  const value = cache[key];
-  if (!value)
-    return undefined;
-  delete cache[key];
-  return cache[key] = value;
-}
-
-function setLRUOverwrite(key, value) {
-  cacheSize += key.length + value.length;
-  cacheSize > MAX_MEMORY_CACHE && delete cache[(Object.keys(cache))[0]];
-  delete cache[key];
-  return cache[key] = value;
-}
-
-//LRU ends
+// LRU (last recently used) cache
+const LRU = {
+  cache: {},
+  get: function (key) {
+    const value = LRU.cache[key];
+    if (!value)
+      return undefined;
+    delete LRU.cache[key];
+    return LRU.cache[key] = value;
+  },
+  put: function (key, value) {
+    const keys = Object.keys(LRU.cache);
+    keys.length > KEYCACHE_SIZE && delete LRU.cache[keys[0]];
+    return LRU.cache[key] = value;
+  }
+};//LRU ends
 
 function mimeType(path) {
   const filetype = path.substr(path.lastIndexOf('.') + 1);
@@ -32,43 +28,38 @@ function mimeType(path) {
   }[filetype];
 }
 
-function cacheDuration(path) {
+function calculateTTL(path) {
   const [user, project, version] = path.split('/');
-  return version.match(/[\da-f]{40}/) ? 31556926 : -1;
+  return version.match(/[\da-f]{40}/) ? 31556926 : 0;
 }
 
-async function fetchAndCache(path) {
-  const ttl = cacheDuration(path);
-  const serverCacheDirective = ttl ? {cf: {cacheTtl: ttl, cacheEverything: true}} : undefined;
-  const rawGithubFile = await fetch(ROOT + path, serverCacheDirective);
-  const result = new Response(rawGithubFile.body, ttl < 0 ? undefined : rawGithubFile);
-  result.headers.set('Content-Type', mimeType(path));
-  result.headers.set("Cache-Control", `max-age=${ttl}`);
-  return result;
-}
-
-async function fetchFromMemoryCache(path, e) {
-  const appCache = getLRU(path);
-  if (appCache) {
-    const {body, contentType, ttl} = JSON.parse(appCache);
-    return new Response(body, {headers: {'x-app-cache-ttl': ttl, 'Content-Type': contentType}});
-  }
-  const response = await fetchAndCache(path);
-  const clone = response.clone(); //todo do i need to clone the response?
-  //e.waitUntil(async function () {
-  const ttl = await clone.headers.get('Cache-Control');
-  if (ttl === 'max-age=-1')
-    return;
-  const contentType = await clone.headers.get('Content-Type');
-  const body = await clone.text();
-  setLRUOverwrite(path, JSON.stringify({body, contentType, ttl}));
-  //});
-  return new Response(JSON.stringify(cache), response);
+function makeResponse(body, mime, ttl, hitMiss) {
+  return new Response(body, {
+    headers: {
+      'Content-Type': mime,
+      "Cache-Control": `max-age=${ttl}`,
+      "x-app-cache-status": hitMiss
+    }
+  });
 }
 
 async function handleRequest(req, e) {
   const url = new URL(req.url);
-  return await fetchFromMemoryCache(url.pathname.substr(1), e);
+  const path = url.pathname.substr(1);
+
+  const appCache = LRU.get(path);
+  if (appCache) {
+    const [body, mime, ttl] = appCache;
+    return makeResponse(body, mime, ttl, 'hit');
+  }
+
+  const ttl = calculateTTL(path);
+  const raw = await fetch(ROOT + path, {cf: {cacheTtl: ttl, cacheEverything: true}});
+  const body = await raw.text();
+  const mime = mimeType(path);
+  if (ttl > 0)
+    LRU.put(path, [body, mime, ttl]);
+  return makeResponse(body, mime, ttl, 'miss');
 }
 
 addEventListener('fetch', e => e.respondWith(handleRequest(e.request, e)));
