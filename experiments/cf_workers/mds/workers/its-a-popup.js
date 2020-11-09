@@ -3,12 +3,19 @@ function getCookieValue(cookie, key) {
 }
 
 function mainpage(cookie, popupOrigin){
-  return `<h1>hello sunshine 21: ${cookie}</h1>
+  return `<h1>hello sunshine 23: ${cookie}</h1>
 RememberMe: <input type='checkbox' /><br>
 <a href="one" title="this is 1">open 'one'</a><br>
 <a href="two" title="this is 2">open 'two'</a>
 
 <script>
+
+  let loginWindow;
+  let loginWindowUrl;
+
+  //function childUnloadsOnMe(){
+  //  loginWindow.closed && console.log('the popup window closed');
+  //}
 
   function receiveLoginData(e){
     if (e.origin !== "${popupOrigin}" || e.source !== loginWindow)
@@ -32,16 +39,15 @@ RememberMe: <input type='checkbox' /><br>
       Object.entries({width, height, left, top}).map(kv => kv.join('=')).join(',');
   }
 
-  let loginWindow;
-  let loginWindowUrl;
-
   function openRequestedSinglePopup(event) {
     event.preventDefault();
     let url = event.currentTarget.href;
     if(document.querySelector('input').checked) 
       url+='/rememberMe';
-    if (!loginWindow || loginWindow.closed)
+    if (!loginWindow || loginWindow.closed){
       loginWindow = window.open(url, "_blank", popupParameters());
+//      loginWindow.onunload = unloadOnMe;//alternative approach to using postMessage. This will require an extra roundtrip to the server
+    }
     else if (loginWindowUrl !== url)
       loginWindow.location = url;
     loginWindowUrl = url;
@@ -54,10 +60,10 @@ function popup(cookieData, myDomain){
   return `
 <h1>success, will self destruct</h1>
 <script>
-  //setTimeout(function () {
+  setTimeout(function () {
     window.opener.postMessage('${cookieData}', '${myDomain}');
-    //window.close();
-  //}, 2000);
+    window.close();
+  }, 2000);
 </script>`;
 }
 
