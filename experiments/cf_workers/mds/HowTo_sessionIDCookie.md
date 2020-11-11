@@ -2,7 +2,7 @@
 
 ```javascript
 const addRemembermeSessionCookieHeader ={
-  'Set-Cookie': "my-cookie=my-value; Secure; HttpOnly; SameSite=Strict; Expires=Mon, 26 Oct 2020 08:33:07 GMT"
+  'Set-Cookie': "my-cookie=my-value; Secure; HttpOnly; SameSite=Strict; Expires=Mon, 26 Oct 2020 08:33:07 GMT; Max-Age=3600"
 }
 const addForgetmeSessionCookieHeader ={
   'Set-Cookie': "my-cookie=my-value; Secure; HttpOnly; SameSite=Strict; Max-Age=3600"//60sec*60min=1hour
@@ -111,7 +111,7 @@ Cookie settings are set as attributes after the cookie name and value in the `Se
 
 2. `Httponly`. The cookie cannot be accessed from JS, not even by the scripts from the domain that issued the cookie. Browsers default: `HttpOnly=false`.
 
-3. `SameSite=Strict`. The cookie will only be sent from the browser to the client when the script that sends the request is from the same domain. This means that scripts loaded from other sites cannot dispatch the registered cookie if they do a `fetch` for example. Browser default: `SameSite=Strict`.
+3. `SameSite=Strict`. The cookie will only be sent from the browser to the client when the script that sends the request is from the same domain. This means that scripts loaded from other sites cannot dispatch the registered cookie if they do a `fetch` for example. Browser default: `SameSite=Lax`.
 
 4. `Domain=.example.com`. The cookie will only be sent from the browser when the request is made to a resource under the specified domain and all its subdomains. This ensures that the cookie is not dispatched to other servers. Super cookies with domains such as `.com` are disallowed. 
 
@@ -131,13 +131,13 @@ To make the browser either forget the session when the browser window closes, or
 
 **ForgetMe cookies**. Commonly known as **session cookies**. They are removed as soon as the browser window closes. 
 
-To create a **forgetMe** cookie, we implement a **session cookie**. We do that by simply NOT setting an `expires` NOR a `Max-Age` attribute on the cookie. The cookie will then be forgotten as soon as the browser window is closed (closing the tab is not enough, go figure..).  
+To create a **forgetMe** cookie, we implement a **session cookie**. We do that by simply NOT setting an `Expires` NOR a `Max-Age` attribute on the cookie. The cookie will then be forgotten as soon as the browser window is closed (closing the tab is not enough, go figure..). If only `Expires` or only `Max-Age` properties is added, the cookie  will also be as a **session cookie**.
 
 ### RememberMe cookies 
 
 **rememberMe cookies** are commonly known as **permanent cookies**. They are saved by the browser even while the browser is closed until the `Expires` date or `Max-Age` is reached.
 
-To create a **rememberMe** cookie, we set an `Expire` date or `Max-age` several days into the future, for example 1 day or 30 days. If the browser has already set a rememberMe cookie, we do not overwrite it.
+To create a **rememberMe** cookie, we set an `Expire` date for several days into the future, (for example 1 day or 30 days) and `Max-Age` for several seconds. If the browser has already set a rememberMe cookie, we do not overwrite it.
 
 **RememberMe cookies** should not last infinitely. If a **RememberMe** cookie is set up to last for 365 days, then if it leaks, a leaked cookie might be valid for many months. To avoid such problems, **rolling cookies** can be used.   
 
@@ -175,4 +175,4 @@ You can't rely on users logging out for security: others might come in and use t
 * [MDN: Cookies](https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies)
 * [RFC 6265](https://tools.ietf.org/html/rfc6265#section-4.1)
 * [Blog: "Just how many web users really disable cookies or JavaScript?"](https://blog.yell.com/2016/04/just-many-web-users-disable-cookies-javascript/)
-* [sending cookies using fetch](https://github.com/github/fetch#user-content-handling-http-error-statuses:~:text=)-,Sending%20cookies,Note%3A%20due%20to%20limitations%20of%20XMLHttpRequest%2C%20using%20credentials%3A%20'omit'%20is%20not%20respected%20for%20same%20domains%20in%20browsers%20where%20this%20polyfill%20is%20active.%20Cookies%20will%20always%20be%20sent%20to%20same%20domains%20in%20older%20browsers.,-Receiving%20cookies)
+* [sending cookies using fetch](https://github.com/github/fetch#sending-cookies)
