@@ -146,39 +146,6 @@ function hexStringToUint8(str){
 }
 ```   
 
-## LRU cache
-
-**Least Recently Used** cache is a simple method of only remembering entities that are currently in use. A cache is useful when we need to avoid doing heaving computation of pure functions again and again, when the function receives the same input data. Using AES-GCM, if the same message is being decrypted again and again, and the cache is safe in the memory of the running app, then a LRU cache can be an excellent alternative to avoid performing superfluous decryption processes that cost the runtime environment upto 1 ms per execution.
-
-This implementation is based on the simple native JS `Object`. This assumes that the keys in the `Object` will be sorted *insertion order*, and that this will not change. Currently, V8 works in this way. As do all other JS runtime environments that I know of. But, the JS spec does not guarantee this behavior. We do this still, instead of using a `Map`, because for V8 to change this behavior would a great many existing applications to break in very subtle and difficult ways, and we therefore believe that `Object` keys will forever be sorted in insertion order in JS V8.
-
-```javascript
-const cache = {};
-const KEYCACHE_SIZE = 3;
-
-function getLRU(key) {
-  const value = cache[key];
-  if (!value)
-    return undefined;
-  delete cache[key];
-  return cache[key] = value;
-}
-
-function setLRU(key, value) {
-  const keys = Object.keys(cache);
-  keys.length >= KEYCACHE_SIZE && delete cache[keys[0]];
-  return cache[key] = value;
-}
-
-setLRU('a', 1); 
-setLRU('b', 2); 
-setLRU('c', 3);
-//cache === {'a': 1, 'b': 2, 'c': 3}
-getLRU('a'); 
-//cache === {'b': 2, 'c': 3, 'a': 1}
-setLRU('d', 4); 
-//cache === {'c': 3, 'a': 1, 'd': 4}
-```
 
 ## encrypt and decrypt
 
