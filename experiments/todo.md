@@ -1,12 +1,100 @@
-## main data structure
+# main data structure
 
-user-file-id. 
+1. all data is public. But you can only write to your own user identities (which are anonymous).
+2. no data in the server db contain information that can link to IRL identity.
+3. no data in the server db is deleted nor overwritten.
+4. the session is only stored on the user side/browser. The session holds only data that the user passes us himself when he authenticates with an openid provider.
 
-is a file with lots of entries. This can be an html file, a js file, a css file, a json file, a test json file, a test group json file, etc.
+## The `user object`
 
-Each file contains a list of lots of entries. such entries can also be added around each file, and these changes will be cleaned up with maybe 5 minutes intervals.
- 
-Each entry is a cmd. and they reference a relationship between two files. Not file content in a sense, although that may be the data of such a relationship. We can think of the modules that enable us to make such entries as views.
+```javascript
+const userObject = { 
+  uid: 'D2G', 
+  username: 'github.com/john.doe', //or 'john.doe@gmail.com'
+  iat: 1605619440958,
+  ttl: 60*60*24*10,
+  rememberMe: 1
+}
+```
+
+1. When a user logs in, he is paired with a `uid`. 
+   * If the user logs in for the first time, he/she will get a new `uid` using an atomic counter. This `uid` is then stored in the user database on the server as a `_googleOrGithubId_uid`/`uid_googleOrGithubId` pair in the user database. 
+   * If the user has logged in before, his google or github id is matched with the `uid` in the db.
+
+2. In addition to the `uid`, the `username` is added to the user object. The username is added so that the user can see which account is logged in using a familiar name. For google, the `username` is a gmail: `john.doe@gmail.com`. For github, the `username` is user homepage: `github.com/john.doe`. 
+
+3. `iat`, `ttl` and `rememberMe` is added so that the validity of a session can be calculated.    
+
+The user object is stored in an aes-gcm-encrypted sessionID cookie in the browser. When the `username` needs to be shown on screen it is either delivered directly from the authentication window or retrieved via a call to `auth.2js.no/username` call that will decrypt the cookie and return the `username` as pure text. `2js.no` doesn't store nor use the `username` serverside, nor use the `username` yet.
+
+Requirement of user consent is considered fulfilled via `'Remember me on this computer'` user prompt. 
+
+## App data
+
+The keys of the data stored on the system follow this format. The value associated with each key is a json object (or `null`).
+
+```
+ * uid := /[A-Z0-9_-]{2,}/ 
+ * file := /[a-zA-Z0-9_-][.a-zA-Z0-9_-]{3,30}\.(html|js|css|mjs|svg)/
+ * time := /[0-9]{13}/
+ * cmd := /[a-zA-Z0-9_-]{2,6}/
+ *
+ * point := userid/file/time
+ * entry := point/cmd/point
+```
+
+An example entry in the kv store would be:  
+
+```
+k2r/myTest.html/1605619440958/op/k2r/myTest.html/1605619440957 =>['i',0,'abc']
+```
+
+If we consider `k2r/myTest.html/1605619440958` to be `p1` and `k2r/myTest.html/1605619440957` as `p2`, a small KV database would be:
+
+```
+p1/op    : v0
+p2/op/p1 : v1
+p3/op/p1 : v2
+p4/op/p2 : v3
+p5/op/p3 : v4
+p5/op/p4 : v5
+```  
+
+When this data is taken into the memory, then it is converted into this format (Note! The map represents a directional graph. To signify direction, the operator name is placed in reverse: `op`/`po`):
+
+```javascript
+const state = {
+  p1: {
+    op: {'': v0},
+    po: {
+      p2: v1,
+      p3: v2
+    }
+  },
+  p2: {
+    op: {p1: v1},
+    po: {p4: v3},
+  },
+  p3: {
+    op: {p1: v2},
+    po: {p5: v4},
+  },
+  p4: {
+    op: {p2: v3},
+    po: {p5: v5},
+  }
+}
+```  
+
+## Query app data
+
+1. user files? `kvStore.list({beginsWith: uid})`, iterate all, and filename in a set. On complete iteration, the set will contain all the filenames for that user.
+2. file data? `kvStore.list({beginsWith: uid/filename})`. Convert this list into in memory map.
+3. text for data? use the in memory map to build a list of all text operations, then put those text operations in the map.  
+4. delete text. mark text as no longer in use.
+5. merge texts, mark a new text entry as the descendant of two other texts with two different mutation strands.
+6. new text. make a new text with empty content (or filled content).
+7. fork text. take a text from another user(or yourself) and then save it under a new name. 
 
 ## views:
 
