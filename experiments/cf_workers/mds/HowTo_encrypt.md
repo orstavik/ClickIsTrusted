@@ -1,4 +1,4 @@
-#  HowTo: make a sessionID cookie using Cloudflare workers
+# HowTo: Encrypt and decrypt a message using AES-GCM?
 
 ## Why: AES-GCM?
 
@@ -49,7 +49,7 @@ function hexStringToUint8(str){
 
 
 
-## Full demo
+## Demo
 
 ```javascript
 
@@ -64,36 +64,6 @@ async function passHash(pw) {
 }
 
 // PASSWORD HASH SHA-256 ends
-
-
-// LRU (least recently used) cache
-// implemented as two pure functions.
-// relies on the keys of normal js objects being sorted insertion order, to ensure safe ordering, use Map instead.
-//
-// EXAMPLE:
-//    const myCache = {};
-//    const MAX = 1000;
-//    ...
-//    const value = await (getLRU(myCache, key) || setLRU(myCache, key, asyncFunction(key, maybeOtherData), max));
-const cache = {};
-const KEYCACHE_SIZE = 1000;
-
-function getLRU(key) {
-  const value = cache[key];
-  if (!value)
-    return undefined;
-  delete cache[key];
-  return cache[key] = value;
-}
-
-function setLRU(key, value) {
-  const keys = Object.keys(cache);
-  keys.length >= KEYCACHE_SIZE && delete cache[keys[0]];
-  return cache[key] = value;
-}
-
-//LRU ends
-
 
 //base64url
 //EXAMPLE:
@@ -153,37 +123,18 @@ async function decryptAESGCM(password, iv, ctStr){
 
 const SECRET = 'klasjdfoqjpwoekfj!askdfj';
 
-function makeEncryptedPage(encryptDecrypt, text){
-  return `
-<h1>This data is no longer ${encryptDecrypt}:</h1>
-<div>${text}</div>
-<a href="/${encryptDecrypt}/${text}">${encryptDecrypt} this data</a>`;
-}
+const plaintext = 'hello sunshine';
 
-const header = {status: 201, headers: {"content-type": "text/html"}};
+console.log(plaintext);
 
-async function handleRequest(req) {
-  const url = new URL(req.url);
-  const [ignore, action, data] = url.pathname.split('/');
-  if(action === 'encrypt'){
-    const iv = crypto.getRandomValues(new Uint8Array(12));
-    const cipher = await encryptAESGCM(SECRET, iv, data);
-    const encrypted = uint8ToHexString(iv) + '.' + toBase64url(btoa(cipher));
-    return new Response(makeEncryptedPage('decrypt', encrypted), header);
-  }
-  if(action === 'decrypt'){
-    let decrypted = getLRU(data);
-    if(!decrypted){
-      const [ivString, ciphertext] = data.split('.');
-      const ciphertextRaw = atob(fromBase64url(ciphertext));
-      const iv = hexStringToUint8(ivString);                                            
-      decrypted = await decryptAESGCM(SECRET, iv, ciphertextRaw);
-      setLRU(data, decrypted);
-    }
-    return new Response(makeEncryptedPage('encrypt', decrypted), header);
-  }
-  return new Response(makeEncryptedPage('encrypt', 'hello sunshine115'), header);
-}
+const iv = crypto.getRandomValues(new Uint8Array(12));
+const cipher = await encryptAESGCM(SECRET, iv, plaintext);
+const encrypted = uint8ToHexString(iv) + '.' + toBase64url(btoa(cipher));
+console.log(encrypted);
 
-addEventListener('fetch', async e => e.respondWith(handleRequest(e.request)));
+const [ivString, ciphertext] = encrypted.split('.');
+const ciphertextRaw = atob(fromBase64url(ciphertext));
+const iv = hexStringToUint8(ivString);
+const decrypted = await decryptAESGCM(SECRET, iv, ciphertextRaw);
+console.log(decrypted);
 ```
