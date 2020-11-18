@@ -40,6 +40,19 @@ Drawbacks of encryption are:
 2. encryption secret can be mined out from several HTTP packets, and is thus open for another type of attack, and
 3. more complex code in the encryption layer.
 
+## Checking expiration data
+
+```javascript
+function checkTTL(iat, ttl) {
+  const now = Date.now();
+  const stillTimeToLive = now < iat + ttl;
+  const notAFutureDream = iat < now;
+  return stillTimeToLive && notAFutureDream;
+}
+```
+
+The following small method is needed in order to check if a session token is still valid. This method is used both when the session token is passed via a state parameter or as a cookie.
+
 ## Demo:
 
 1.  we have a worker that redirects to itself with a state parameter with encrypted data
@@ -132,7 +145,6 @@ async function decryptData(data, password) {
   const cipher = atob(fromBase64url(cipherB64url));
   return await decryptAESGCM(password, iv, cipher);
 }
-//imported pure functions ends
 
 function checkTTL(iat, ttl) {
   const now = Date.now();
@@ -140,6 +152,8 @@ function checkTTL(iat, ttl) {
   const notAFutureDream = iat < now;
   return stillTimeToLive && notAFutureDream;
 }
+
+//imported pure functions ends
 
 async function handleRequest(request) {
   const url = new URL(request.url);

@@ -1,13 +1,13 @@
 const SECRET = "klasjdfoqjpwoekfj!askdfj"
 const ROOT = "auth.2js.no";
-const STATE_PARAM_TTL = 3*60;
-const SESSION_TTL = 60*60*24*7;
+const STATE_PARAM_TTL = 3 * 60;
+const SESSION_TTL = 60 * 60 * 24 * 7;
 let cachedPassHash;
 
 
 //imported pure functions begins
 function getCookieValue(cookie, key) {
-  return cookie?.match(`(^|;)\\s*${key}\\s*=\\s*([^;]+)`) ?.pop();
+  return cookie?.match(`(^|;)\\s*${key}\\s*=\\s*([^;]+)`)?.pop();
 }
 
 function uint8ToHexString(ar) {
@@ -37,14 +37,14 @@ async function passHash(pw) {
 
 async function makeKeyAESGCM(password, iv) {
   const pwHash = await passHash(password);
-  const alg = { name: 'AES-GCM', iv: iv };                            // specify algorithm to use
+  const alg = {name: 'AES-GCM', iv: iv};                            // specify algorithm to use
   return await crypto.subtle.importKey('raw', pwHash, alg, false, ['decrypt', 'encrypt']);  // use pw to generate key
 }
 
 async function encryptAESGCM(password, iv, plaintext) {
   const key = await makeKeyAESGCM(password, iv);
   const ptUint8 = new TextEncoder().encode(plaintext);                               // encode plaintext as UTF-8
-  const ctBuffer = await crypto.subtle.encrypt({ name: key.algorithm.name, iv: iv }, key, ptUint8);                   // encrypt plaintext using key
+  const ctBuffer = await crypto.subtle.encrypt({name: key.algorithm.name, iv: iv}, key, ptUint8);                   // encrypt plaintext using key
   const ctArray = Array.from(new Uint8Array(ctBuffer));                              // ciphertext as byte array
   return ctArray.map(byte => String.fromCharCode(byte)).join('');             // ciphertext as string
 }
@@ -52,7 +52,7 @@ async function encryptAESGCM(password, iv, plaintext) {
 async function decryptAESGCM(password, iv, ctStr) {
   const key = await makeKeyAESGCM(password, iv);
   const ctUint8 = new Uint8Array(ctStr.match(/[\s\S]/g).map(ch => ch.charCodeAt(0))); // ciphertext as Uint8Array
-  const plainBuffer = await crypto.subtle.decrypt({ name: key.algorithm.name, iv: iv }, key, ctUint8);                 // decrypt ciphertext using key
+  const plainBuffer = await crypto.subtle.decrypt({name: key.algorithm.name, iv: iv}, key, ctUint8);                 // decrypt ciphertext using key
   return new TextDecoder().decode(plainBuffer);                                       // return the plaintext
 }
 
@@ -68,7 +68,6 @@ async function decryptData(data, password) {
   const cipher = atob(fromBase64url(cipherB64url));
   return await decryptAESGCM(password, iv, cipher);
 }
-//imported pure functions ends
 
 function checkTTL(iat, ttl) {
   const now = Date.now();
@@ -77,11 +76,13 @@ function checkTTL(iat, ttl) {
   return stillTimeToLive && notAFutureDream;
 }
 
+//imported pure functions ends
+
 async function handleRequest(request) {
   const url = new URL(request.url);
   const [ignore, action] = url.pathname.split('/');
   const stateParam = url.searchParams.get('state');
-  if(!action && !stateParam){
+  if (!action && !stateParam) {
     //1. first time
     //2. worker makes a state param, with ttl, iat, passphrase and encrypts it with SECRET
     const rm = url.searchParams.get('remember-me') !== null;
@@ -99,7 +100,7 @@ async function handleRequest(request) {
     if (!checkTTL(iat, ttl))
       return new Response("Error: state param timed out");
     // 6. creates a new sessionID object with iat, ttl, userId (which is just a fixed value like 'Max')
-    let sessionID = JSON.stringify({ iat: Date.now(), ttl: SESSION_TTL, username: "Max", uid: "Ivar" });
+    let sessionID = JSON.stringify({iat: Date.now(), ttl: SESSION_TTL, username: "Max", uid: "Ivar"});
     let encryptedSessionID = await encryptData(sessionID);
     return new Response(`<a href="/showCookie">get cookies</a>`, {
       status: 200,
@@ -129,4 +130,4 @@ async function handleRequest(request) {
   return Response.redirect(redirectUrl);
 }
 
-addEventListener('fetch', e =>e.respondWith(handleRequest(e.request)));
+addEventListener('fetch', e => e.respondWith(handleRequest(e.request)));
