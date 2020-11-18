@@ -62,8 +62,8 @@ Drawbacks of encryption are:
 ## Demo code:
 
 ```javascript
-let SECRET = "klasjdfoqjpwoekfj!askdfj"
-const ROOT = "TODO.TODO.workers.dev"; //TODO
+const SECRET = "klasjdfoqjpwoekfj!askdfj"
+const ROOT = "auth.2js.no";
 const STATE_PARAM_TTL = 3*60;
 const SESSION_TTL = 60*60*24*7;
 let cachedPassHash;
@@ -71,7 +71,7 @@ let cachedPassHash;
 
 //imported pure functions begins
 function getCookieValue(cookie, key) {
-  return cookie ?.match(`(^|;)\\s*${key}\\s*=\\s*([^;]+)`) ?.pop();
+  return cookie?.match(`(^|;)\\s*${key}\\s*=\\s*([^;]+)`) ?.pop();
 }
 
 function uint8ToHexString(ar) {
@@ -130,16 +130,9 @@ async function decryptData(data, password) {
   const [ivText, cipherB64url] = data.split('.');
   const iv = hexStringToUint8(ivText);
   const cipher = atob(fromBase64url(cipherB64url));
-  const payload = await decryptAESGCM(password, iv, cipher);
-  let [iat, ttl, someOtherState] = payload.split('.');
-  return [iat, ttl];
+  return await decryptAESGCM(password, iv, cipher);
 }
 //imported pure functions ends
-
-//max. the getState(ttl) and checkData(iat, ttl) functions are application specific, don't mix them in with the list of pure functions.
-function getState(ttl) {
-  return [Date.now(), ttl, uint8ToHexString(crypto.getRandomValues(new Uint8Array(8)))].join('.');
-}
 
 function checkTTL(iat, ttl) {
   const now = Date.now();
@@ -155,7 +148,8 @@ async function handleRequest(request) {
   if(!action && !stateParam){
     //1. first time
     //2. worker makes a state param, with ttl, iat, passphrase and encrypts it with SECRET
-    const state = getState(STATE_PARAM_TTL);
+    const rm = url.searchParams.get('remember-me') !== null;
+    const state = JSON.stringify({iat: Date.now(), ttl: STATE_PARAM_TTL, rm});
     const encryptedState = await encryptData(state);
     const redirectUrl = "https://" + ROOT + "/?state=" + encodeURIComponent(encryptedState);
     //3. browser <= REDIRECT: my.worker.dev/?state=.... <= worker
@@ -164,11 +158,12 @@ async function handleRequest(request) {
   //4. browser => GET my.worker.dev/?state=... => worker
   if (!action && stateParam) {
     // 5. worker decrypts the state param with the same SECRET, checks the ttl, iat, and passphrase
-    let [_iat, _ttl] = await decryptData(stateParam, SECRET); // return decrypted value.
-    if (!checkTTL(_iat, _ttl))
+    const stateJson = await decryptData(stateParam, SECRET); // return decrypted value.
+    const {iat, ttl, rm} = JSON.parse(stateJson);
+    if (!checkTTL(iat, ttl))
       return new Response("Error: state param timed out");
     // 6. creates a new sessionID object with iat, ttl, userId (which is just a fixed value like 'Max')
-    let sessionID = JSON.stringify({ iat: Date.now(), ttl: SESSION_TTL, uid: "Max" });
+    let sessionID = JSON.stringify({ iat: Date.now(), ttl: SESSION_TTL, username: "Max", uid: "Ivar" });
     let encryptedSessionID = await encryptData(sessionID);
     return new Response(`<a href="/showCookie">get cookies</a>`, {
       status: 200,
@@ -184,12 +179,12 @@ async function handleRequest(request) {
     const cookie = getCookieValue(request.headers.get('cookie'), 'SESSIONID');
     if (cookie) {
       // 10. worker decrypts the cookie coming with the http request, using the same SECRET, checks the ttl, iat, and finds the uid.
-      let [cookieData, ignore] = await decryptData(cookie, SECRET);
+      let cookieData = await decryptData(cookie, SECRET);
       let cookieDataObj = JSON.parse(cookieData);
       if (!checkTTL(cookieDataObj.iat, cookieDataObj.ttl))
         return new Response("Error: session timed out");
       //11. browser <= 200: my.worker.dev/showCookie with the value of the userId <= worker
-      return new Response(cookieDataObj.uid);
+      return new Response(cookieDataObj.username);
     }
     return new Response("no cookie! :(");
   }
