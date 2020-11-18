@@ -18,9 +18,9 @@ So. The server can save state between different http messages with the same brow
    2. Add a timestamp to this information.
    3. Encrypt this information.
    4. Put the encrypted information in a cookie or a redirect parameter.
-   5. when receving a redirect or another http request, look for the redirect parameter or the cookie.
-   6. decrypt this information and check the timestamp.
-   7. use the same state information that it had from the previous session.
+   5. When receving a redirect or another http request, look for the redirect parameter or the cookie.
+   6. Decrypt this information and check the timestamp.
+   7. Use the same state information that it had from the previous session.
 
 ## Authentication and sessions.
 
@@ -63,7 +63,7 @@ Drawbacks of encryption are:
 
 ```javascript
 let SECRET = "klasjdfoqjpwoekfj!askdfj"
-const ROOT = "TODO.TODO.workers.dev"; //TODO
+const ROOT = "TODO.TODO.workers.dev"; //TODO                                        
 const STATE_PARAM_TTL = 3*60;
 const SESSION_TTL = 60*60*24*7;
 let cachedPassHash;
@@ -71,7 +71,7 @@ let cachedPassHash;
 
 //imported pure functions begins
 function getCookieValue(cookie, key) {
-  return cookie ?.match(`(^|;)\\s*${key}\\s*=\\s*([^;]+)`) ?.pop();
+  return cookie ?.match(`(^|;)\\s*${key}\\s*=\\s*([^;]+)`) ?.pop();                                          
 }
 
 function uint8ToHexString(ar) {
@@ -101,23 +101,23 @@ async function passHash(pw) {
 
 async function makeKeyAESGCM(password, iv) {
   const pwHash = await passHash(password);
-  const alg = { name: 'AES-GCM', iv: iv };                            // specify algorithm to use
+  const alg = { name: 'AES-GCM', iv: iv }; // specify algorithm to use
   return await crypto.subtle.importKey('raw', pwHash, alg, false, ['decrypt', 'encrypt']);  // use pw to generate key
 }
 
 async function encryptAESGCM(password, iv, plaintext) {
   const key = await makeKeyAESGCM(password, iv);
-  const ptUint8 = new TextEncoder().encode(plaintext);                               // encode plaintext as UTF-8
-  const ctBuffer = await crypto.subtle.encrypt({ name: key.algorithm.name, iv: iv }, key, ptUint8);                   // encrypt plaintext using key
-  const ctArray = Array.from(new Uint8Array(ctBuffer));                              // ciphertext as byte array
-  return ctArray.map(byte => String.fromCharCode(byte)).join('');             // ciphertext as string
+  const ptUint8 = new TextEncoder().encode(plaintext);  // encode plaintext as UTF-8
+  const ctBuffer = await crypto.subtle.encrypt({ name: key.algorithm.name, iv: iv }, key, ptUint8);  // encrypt plaintext using key
+  const ctArray = Array.from(new Uint8Array(ctBuffer)); // ciphertext as byte array
+  return ctArray.map(byte => String.fromCharCode(byte)).join(''); // ciphertext as string
 }
 
 async function decryptAESGCM(password, iv, ctStr) {
   const key = await makeKeyAESGCM(password, iv);
   const ctUint8 = new Uint8Array(ctStr.match(/[\s\S]/g).map(ch => ch.charCodeAt(0))); // ciphertext as Uint8Array
-  const plainBuffer = await crypto.subtle.decrypt({ name: key.algorithm.name, iv: iv }, key, ctUint8);                 // decrypt ciphertext using key
-  return new TextDecoder().decode(plainBuffer);                                       // return the plaintext
+  const plainBuffer = await crypto.subtle.decrypt({ name: key.algorithm.name, iv: iv }, key, ctUint8); // decrypt ciphertext using key
+  return new TextDecoder().decode(plainBuffer); // return the plaintext
 }
 
 async function encryptData(data) {
@@ -149,53 +149,41 @@ function checkTTL(iat, ttl) {
 }
 
 async function handleRequest(request) {
-  const url = new URL(request.url);
-  const [ignore, action] = url.pathname.split('/');
-  const stateParam = url.searchParams.get('state');
-  if(!action && !stateParam){
-    //1. first time
-    //2. worker makes a state param, with ttl, iat, passphrase and encrypts it with SECRET
-    const state = getState(ttl);
-    const encryptedState = await encryptData(state);
-    const redirectUrl = "https://" + ROOT + "/?state=" + encodeURIComponent(encryptedState);
-    //3. browser <= REDIRECT: my.worker.dev/?state=.... <= worker
-    return Response.redirect(redirectUrl);
+  const url = new URL(request.url); //get current url
+  const [ignore, action] = url.pathname.split('/'); // split url to extract command.
+  const stateParam = url.searchParams.get('state'); // state parameter check, appears after redirection and contains an encrypted status value.
+  if(!action && !stateParam){ //conditions are met only at first loading.
+    const state = getState(STATE_PARAM_TTL); // worker makes a state param, with ttl, iat, passphrase and encrypts it with SECRET.
+    const encryptedState = await encryptData(state); // state encrypt - (convert to a string, which contains encrypted iv and data separated by a dot.
+    const redirectUrl = "https://" + ROOT + "/?state=" + encodeURIComponent(encryptedState); // make redirect url and set state param with a encrypted state value.
+    return Response.redirect(redirectUrl);   // do redirect. Recall handleRequest() but this block of code will not execute
   }
-  //4. browser => GET my.worker.dev/?state=... => worker
-  if (!action && stateParam) {
-    // 5. worker decrypts the state param with the same SECRET, checks the ttl, iat, and passphrase
-    let [_iat, _ttl] = await decryptData(stateParam, SECRET); // return decrypted value.
-    if (!checkTTL(_iat, _ttl))
+  if (!action && stateParam) { 
+    let [_iat, _ttl] = await decryptData(stateParam, SECRET); // worker decrypts the state param with the same SECRET, checks the ttl, iat, and passphrase
+    if (!checkTTL(_iat, _ttl)) //Expiration check
       return new Response("Error: state param timed out");
     // 6. creates a new sessionID object with iat, ttl, userId (which is just a fixed value like 'Max')
-    let sessionID = JSON.stringify({ iat: Date.now(), ttl: SESSION_TTL, uid: "Max" });
+    let sessionID = JSON.stringify({ iat: Date.now(), ttl: SESSION_TTL, uid: "Max" }); // render anchor element which provide showCookie action when clicked
     let encryptedSessionID = await encryptData(sessionID);
     return new Response(`<a href="/showCookie">get cookies</a>`, {
       status: 200,
       headers: {
         'content-type': 'text/html',
-        // 7. sets this sessionID as a cookie
-        'Set-Cookie': `SESSIONID=${encryptedSessionID}; HttpOnly; Secure; SameSite=Strict; Path=/; Domain=${ROOT};`
+        'Set-Cookie': `SESSIONID=${encryptedSessionID}; HttpOnly; Secure; SameSite=Strict; Path=/; Domain=${ROOT};` //sets this sessionID as a cookie
       }
     });
   }
-  //9. browser => GET my.worker.dev/showCookie => worker
-  if (action === "showCookie") {
-    const cookie = getCookieValue(request.headers.get('cookie'), 'SESSIONID');
-    if (cookie) {
-      // 10. worker decrypts the cookie coming with the http request, using the same SECRET, checks the ttl, iat, and finds the uid.
-      let [cookieData, ignore] = await decryptData(cookie, SECRET);
-      let cookieDataObj = JSON.parse(cookieData);
-      if (!checkTTL(cookieDataObj.iat, cookieDataObj.ttl))
+  if (action === "showCookie") { // will execute only after anchor element click
+    const cookie = getCookieValue(request.headers.get('cookie'), 'SESSIONID'); 
+    if (cookie) {  // get cookie
+      let [cookieData, ignore] = await decryptData(cookie, SECRET); //worker decrypts the cookie coming with the http request, using the same SECRET, checks the ttl, iat, and finds the uid.
+      let cookieDataObj = JSON.parse(cookieData);  // convert from string into object
+      if (!checkTTL(cookieDataObj.iat, cookieDataObj.ttl)) // expiration check
         return new Response("Error: session timed out");
-      //11. browser <= 200: my.worker.dev/showCookie with the value of the userId <= worker
-      return new Response(cookieDataObj.uid);
+      return new Response(cookieDataObj.uid); //response with encrypted cookie value
     }
     return new Response("no cookie! :(");
   }
-
-  //3. browser <= REDIRECT: my.worker.dev/?state=.... <= worker
-  return Response.redirect(redirectUrl);
 }
 
 addEventListener('fetch', e =>e.respondWith(handleRequest(e.request)));
