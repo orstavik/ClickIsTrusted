@@ -138,7 +138,7 @@ async function decryptData(data, password) {
 
 //max. the getState(ttl) and checkData(iat, ttl) functions are application specific, don't mix them in with the list of pure functions.
 function getState(ttl) {
-  return [Date.now(), STATE_PARAM_TTL, uint8ToHexString(crypto.getRandomValues(new Uint8Array(8)))].join('.');
+  return [Date.now(), ttl, uint8ToHexString(crypto.getRandomValues(new Uint8Array(8)))].join('.');
 }
 
 function checkTTL(iat, ttl) {
@@ -155,7 +155,7 @@ async function handleRequest(request) {
   if(!action && !stateParam){
     //1. first time
     //2. worker makes a state param, with ttl, iat, passphrase and encrypts it with SECRET
-    const state = getState(ttl);
+    const state = getState(STATE_PARAM_TTL);
     const encryptedState = await encryptData(state);
     const redirectUrl = "https://" + ROOT + "/?state=" + encodeURIComponent(encryptedState);
     //3. browser <= REDIRECT: my.worker.dev/?state=.... <= worker
