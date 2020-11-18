@@ -8,6 +8,8 @@
 
 2. login in to github.com and make a new application using:
 `https://github.com/settings/applications/new`.
+To update the settings, go to:
+`https://github.com/settings/applications/`.
 
 3. the domain of the app is the worker, the callback is the worker address + `/fromGithub`  
 
