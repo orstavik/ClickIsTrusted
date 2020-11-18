@@ -52,7 +52,6 @@ function hexStringToUint8(str){
 ## Demo
 
 ```javascript
-
 // PASSWORD HASH SHA-256
 //   A cached hashing of the password which is reused multiple times.
 //   turns short strings with length 5 and long strings with length 500 into hash strings always 256 long.
@@ -137,4 +136,23 @@ const ciphertextRaw = atob(fromBase64url(ciphertext));
 const iv = hexStringToUint8(ivString);
 const decrypted = await decryptAESGCM(SECRET, iv, ciphertextRaw);
 console.log(decrypted);
+```
+
+## encrypt and decrypt to and from the same source
+
+```javascript
+async function encryptData(data) {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const cipher = await encryptAESGCM(SECRET, iv, data);
+  return uint8ToHexString(iv) + '.' + toBase64url(btoa(cipher));
+}
+
+async function decryptData(data, password) {
+  const [ivText, cipherB64url] = data.split('.');
+  const iv = hexStringToUint8(ivText);
+  const cipher = atob(fromBase64url(cipherB64url));
+  const payload = await decryptAESGCM(password, iv, cipher);
+  let [iat, ttl, someOtherState] = payload.split('.');
+  return [iat, ttl];
+}
 ```
