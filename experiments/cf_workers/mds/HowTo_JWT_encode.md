@@ -1,2 +1,0 @@
-# HowTo: decode JWT objects?
-
